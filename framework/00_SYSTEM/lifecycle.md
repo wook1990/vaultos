@@ -86,4 +86,4 @@ Old Specification / Rejected CR / Superseded ADR / Deprecated Architecture / Clo
 
 ## 상세 안내
 
-재설계 배경: [Zone Simplification](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+재설계 배경: [Zone Simplification](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)

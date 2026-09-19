@@ -23,7 +23,7 @@ updated: 2026-09-19
 | Curation | KnowledgeOS 소스 분석 / 전문 큐레이션 | [[04_AGENTS/curation/01_AI_Curation_Caution_Agent\|계약]] |
 | **Human** | 방향 / Scope / 우선순위 / 승인 | — |
 
-**미정의 역할은 지금 만들지 않는다.** 실제로 그 역할이 필요해진 시점에 계약을 작성한다. 이 볼트는 쓰지 않는 구조를 미리 만들어 방치한 이력이 있다([인벤토리](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md) 참고).
+**미정의 역할은 지금 만들지 않는다.** 실제로 그 역할이 필요해진 시점에 계약을 작성한다. 이 볼트는 쓰지 않는 구조를 미리 만들어 방치한 이력이 있다([인벤토리](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md) 참고).
 
 ## Multi-Model 원칙
 

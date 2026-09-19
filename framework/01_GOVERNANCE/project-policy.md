@@ -156,4 +156,4 @@ next: [TASK-138]
 이 볼트는 과거 프로젝트당 파일이 53~115개까지 불어난 이력이 있다(Tracking Mirror 15개, 거버넌스 문서 10개 이상). 2026-09-19에 9~28개로 되돌렸다.
 
 **프로젝트 폴더의 파일 수가 늘기 시작하면 원인을 먼저 확인한다.**
-배경: [Zone Simplification](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+배경: [Zone Simplification](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)

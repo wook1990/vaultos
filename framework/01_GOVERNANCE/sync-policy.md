@@ -19,7 +19,7 @@ updated: 2026-09-19
 | API Key, Token, Credential | **Secret Manager / ENV** | 어느 쪽에도 두지 않는다 |
 
 **"정본은 클라우드"는 볼트 문서에 대해서만 참이다.**
-코드와 tracker를 Drive로 옮기면 Drive가 병합을 못 하기 때문에 곧바로 충돌이 나고, 결국 "볼트 사본 vs repo 원본" 중복이 되살아난다. 실제로 그렇게 됐던 사례가 [프로젝트 초기화 기록](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)에 있다 — 한 프로젝트의 `docs/` 88개 중 44개만, 그것도 넉 달 묵은 상태로 볼트에 복제돼 있었다.
+코드와 tracker를 Drive로 옮기면 Drive가 병합을 못 하기 때문에 곧바로 충돌이 나고, 결국 "볼트 사본 vs repo 원본" 중복이 되살아난다. 실제로 그렇게 됐던 사례가 [프로젝트 초기화 기록](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)에 있다 — 한 프로젝트의 `docs/` 88개 중 44개만, 그것도 넉 달 묵은 상태로 볼트에 복제돼 있었다.
 
 ### repo 주소는 URL이지 경로가 아니다
 

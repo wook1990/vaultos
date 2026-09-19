@@ -130,7 +130,7 @@ Verification Coverage  = PASS Evidence가 있는 Requirement / 구현 완료 Req
 
 ## 이 볼트에서의 적용 원칙
 
-이 볼트는 과거에 "운영되지 않는 구조를 과잉 생성"하는 실패를 반복했다([인벤토리](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md) 참고 — 4월에 만든 구조의 상당수가 2개월 내 방치됨).
+이 볼트는 과거에 "운영되지 않는 구조를 과잉 생성"하는 실패를 반복했다([인벤토리](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md) 참고 — 4월에 만든 구조의 상당수가 2개월 내 방치됨).
 
 따라서 AIPM-Trace는 **한 번에 전부 적용하지 않는다.**
 

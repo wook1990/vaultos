@@ -13,7 +13,7 @@ Repo    = Execution SSOT  실제로 무엇이 만들어졌는가  (Code / Test /
 ## 시작하기
 
 ```sh
-git clone https://github.com/<you>/vaultos.git
+git clone https://github.com/wook1990/vaultos.git
 cd vaultos
 python3 init.py
 ```

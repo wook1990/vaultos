@@ -102,7 +102,7 @@ python3 <repo>/src/vaultos_health.py "<vault_path>"
 - 자동화(Traceability 검사, Drift 탐지, Event Log, Dashboard)는 **실제로 필요해진 시점에** 만든다.
 - 한 바퀴 돌려보고 아쉬웠던 것만 추가한다.
 
-전체 기록: [Inventory](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md) / [Target Architecture](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+전체 기록: [Inventory](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md) / [Target Architecture](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
 
 ## 6. 사람이 반드시 판단해야 하는 것
 

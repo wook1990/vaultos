@@ -116,8 +116,8 @@ Repo     = Execution SSOT  실제로 무엇이 만들어졌는가 (Code / Test /
 
 ## 8. 이 구조의 이력
 
-- 2026-09-19: 3-Zone 단순화 → [기록](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
-- 2026-09-19: 전수 조사 → [기록](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
-- 2026-09-19: AIPM-Trace 구조로 이행 → [기록](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+- 2026-09-19: 3-Zone 단순화 → [기록](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
+- 2026-09-19: 전수 조사 → [기록](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
+- 2026-09-19: AIPM-Trace 구조로 이행 → [기록](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
 
 이전 세대 문서는 `99_ARCHIVE/legacy-vault/`에 동결 보관한다. **평소에는 열지 않는다.**

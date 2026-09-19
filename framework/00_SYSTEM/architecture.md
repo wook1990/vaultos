@@ -119,4 +119,4 @@ reports/worklog/ 일간·주간·월간 기록
 ## 이전 구조
 
 2026-09-19 이전에는 PARA 기반 `000_VaultOS` ~ `900_Templates` 구조였다.
-매핑표와 이행 기록: [Target Architecture And Migration](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+매핑표와 이행 기록: [Target Architecture And Migration](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)

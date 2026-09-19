@@ -97,7 +97,7 @@ Inbox/References 소스를 분석하거나, 큐레이션 노트를 만들거나,
 - 하위 명령(`sync:vault`, `sync:workspace-agents`)은 상태 문서 갱신 하나로 통합되어 더 이상 필요하지 않다.
 - vault 쪽 상태 문서는 정본이 아니므로, 유실되거나 충돌해도 Zone A에서 다시 생성하면 된다.
 
-배경: [Zone Simplification](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+배경: [Zone Simplification](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
 
 ## 6. 프로젝트 작업 시
 

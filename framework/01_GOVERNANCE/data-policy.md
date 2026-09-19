@@ -122,7 +122,7 @@ DB_PASSWORD     → Secret Manager
 
 경로 참조(`.codex/vault-sync.env` 같은 파일 위치)는 허용한다. 값 자체를 적는 것이 금지다.
 
-> 2026-09-19 전수 스캔 결과, 이 볼트에는 실제 API 키·토큰·자격증명 문자열이 **발견되지 않았다.** 환경변수 참조 경로만 기록돼 있어 현재는 허용 범위다. 기록: [Inventory](https://github.com/<you>/vaultos/blob/main/docs/CASE-STUDY.md)
+> 2026-09-19 전수 스캔 결과, 이 볼트에는 실제 API 키·토큰·자격증명 문자열이 **발견되지 않았다.** 환경변수 참조 경로만 기록돼 있어 현재는 허용 범위다. 기록: [Inventory](https://github.com/wook1990/vaultos/blob/main/docs/CASE-STUDY.md)
 
 ## 6. 금지 요약
 
