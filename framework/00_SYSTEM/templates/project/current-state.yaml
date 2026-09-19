@@ -1,0 +1,26 @@
+# 현재 상태 (Current State)
+#
+# 이 파일은 **최소로 유지한다.** 지금 운영에 필요한 것만 남긴다.
+# 완료된 것, 지나간 결정, 닫힌 리스크는 여기에 쌓지 않는다.
+#
+# Current Truth != History
+#   현재 상태 → 이 파일
+#   과거 이력 → status/decision-log.md, changes/CR-*.md, architecture/adr/
+#
+# 이 파일이 길어지고 있다면 이력이 섞여 들어온 것이다. 덜어낸다.
+
+phase: implementation
+# idea | discovery | planning | approved | implementation
+# | verification | release | maintenance | archive
+
+current_feature: []       # 지금 진행 중인 Feature. 예: [F-018]
+
+blocked: []               # 막혀 있는 것과 이유. 예: [TASK-122]
+
+pending_approval: []      # 사람 승인 대기. 예: [CR-014]
+
+open_risks: []            # 열려 있는 리스크만. 예: [RISK-007]
+
+next: []                  # 다음에 할 일 1~3개. 예: [TASK-138]
+
+updated: 2026-09-19

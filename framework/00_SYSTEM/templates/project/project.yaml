@@ -1,0 +1,50 @@
+# 프로젝트 진입점 — personal-light는 이 파일 하나면 시작할 수 있다.
+#
+# 에이전트는 프로젝트 작업을 시작할 때 전체 문서를 읽지 않는다.
+# 이 파일을 먼저 읽고, 필요한 것만 단계적으로 가져온다. (00_SYSTEM/context-loading.md)
+#
+# 프로젝트가 커지면 그때 constitution.md / requirements.yaml 을 추가한다.
+# 미리 만들지 않는다.
+
+project:
+  id: PROJ-KEY            # 대문자 하이픈. 예: GEN-HEALTH
+  name: 프로젝트 이름
+  slug: project-slug      # 폴더명과 동일
+
+workspace:
+  type: personal          # personal | company
+
+governance_profile: personal-light
+# personal-light   이 파일 하나. 개인 실험
+# personal-full    + constitution / requirements / evidence. 개인 프로덕션
+# company-standard + adr / risks / decision-log
+# company-strict   + events.jsonl / classification / release approval
+
+mission: 한 줄로 이 프로젝트가 존재하는 이유
+
+# --- 지금 상태 (personal-light는 여기까지가 전부) ---
+
+status:
+  phase: idea             # idea | discovery | planning | approved | implementation
+                          # | verification | release | maintenance | archive
+  release: null
+
+next_actions: []          # 지금 당장 할 일 1~3개
+blocked: []               # 막힌 것과 이유
+
+# --- 실행 정본 (코드가 있는 프로젝트만) ---
+
+repo:
+  url: null               # 정본. 예: https://github.com/<you>/my-app
+                          # 어느 기기에서든 같은 값이다. 이것이 프로젝트의 주소다.
+  local: {}               # 기기별 clone 위치. 정본이 아니라 편의 정보다.
+                          # 예:
+                          #   wsl: /home/<you>/workspace/my-app
+                          #   mac: /Users/<you>/workspace/my-app
+
+# --- 아래는 personal-full 이상에서만 채운다 ---
+
+critical_requirements: [] # 예: [REQ-001]
+open_changes: []          # 예: [CR-007]
+active_adrs: []           # 예: [ADR-004]
+open_risks: []            # 예: [RISK-007]
