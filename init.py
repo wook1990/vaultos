@@ -97,6 +97,18 @@ STORAGE = {
 }
 
 
+def under_cloud(path):
+    """워크스페이스가 클라우드 동기화 폴더 안에 있는지 본다.
+
+    코드를 클라우드에 두면 .git 내부와 빌드 산출물이 동기화되어
+    저장소가 깨지거나 충돌한다. 이건 막아야 한다.
+    """
+    p = os.path.abspath(os.path.expanduser(path)).replace("\\", "/")
+    marks = ["CloudStorage", "Google Drive", "GoogleDrive", "내 드라이브", "My Drive",
+             "Dropbox", "OneDrive", "iCloud"]
+    return next((m for m in marks if m in p), None)
+
+
 def ask(prompt, default=None, choices=None):
     while True:
         hint = f" [{default}]" if default else ""
@@ -143,6 +155,41 @@ def inject_storage_section(vault, storage_key):
     write(path, s)
 
 
+def make_workspace_root(root, company):
+    """개발이 실제로 일어나는 곳. 볼트와 달리 클라우드에 두지 않는다."""
+    os.makedirs(os.path.join(root, "personal"), exist_ok=True)
+    if company:
+        os.makedirs(os.path.join(root, "company"), exist_ok=True)
+    readme = os.path.join(root, "README.md")
+    if not os.path.exists(readme):
+        write(readme, """# Project Workspaces
+
+**개발이 실제로 일어나는 곳이다.** VaultOS 볼트(관리 디렉터리)와 분리돼 있다.
+
+```
+personal/<slug>/    개인 프로젝트 저장소
+company/<slug>/     회사 프로젝트 저장소
+```
+
+각 프로젝트는 `vaultos new <slug>` 로 만든다. 만들어질 때:
+
+- git 저장소가 초기화되고
+- VaultOS 계약 표면이 고정되며 (`.vaultos/`, `tracker/`, 진입점)
+- 볼트에 프로젝트가 등록된다
+
+## 여기에 두지 않는 것
+
+- 의도 문서(product-brief, roadmap, architecture) → 볼트가 담당한다
+- 정책·계약 본문 → 볼트를 가리키기만 한다
+
+## 클라우드에 두지 않는 이유
+
+`.git` 내부가 동기화되면 두 기기가 경쟁할 때 저장소가 깨진다.
+빌드 산출물과 의존성 폴더도 동기화 대상이 되어 충돌한다.
+**코드는 git으로, 문서는 클라우드로.**
+""")
+
+
 def write_obsidian_config(vault, company):
     """Obsidian이 바로 열 수 있는 최소 설정. 플러그인 없이도 동작한다."""
     import json
@@ -177,11 +224,12 @@ def main():
     ap = argparse.ArgumentParser(description="VaultOS 환경을 생성한다")
     ap.add_argument("--path", help="볼트를 만들 경로")
     ap.add_argument("--storage", choices=sorted(STORAGE), help="저장소 백엔드")
+    ap.add_argument("--workspace", help="개발 워크스페이스 루트 (클라우드 밖)")
     ap.add_argument("--company", action="store_true", help="company 워크스페이스도 생성")
     ap.add_argument("--force", action="store_true", help="비어있지 않은 경로에도 설치")
     args = ap.parse_args()
 
-    interactive = not (args.path and args.storage)
+    interactive = not (args.path and args.storage and args.workspace)
     if interactive:
         print("VaultOS 초기화\n")
         print("볼트를 어디에 만들지 정합니다. 클라우드 동기화 폴더 안을 권장합니다.")
@@ -198,6 +246,25 @@ def main():
             print(f"  {k:<15} {v['label']}  ({mark})")
         print()
     storage = args.storage or ask("백엔드", default="gdrive", choices=sorted(STORAGE))
+
+    # 프로젝트 워크스페이스 루트 — 개발이 실제로 일어나는 곳
+    if interactive:
+        print("\n개발이 실제로 일어날 워크스페이스 루트를 정합니다.")
+        print("**클라우드 동기화 폴더 밖**이어야 합니다. 코드는 git으로 관리합니다.")
+        print("예) ~/workspace/projects\n")
+    ws = args.workspace or (ask("워크스페이스 루트", default="~/workspace/projects")
+                            if interactive else "~/workspace/projects")
+    ws = os.path.abspath(os.path.expanduser(ws))
+    mark = under_cloud(ws)
+    if mark:
+        print(f"\n  경고: 워크스페이스 루트가 클라우드 경로 안입니다 ({mark}).")
+        print("  .git 내부가 동기화되면 저장소가 깨질 수 있습니다.")
+        if interactive:
+            if not ask("그래도 계속할까요? (y/n)", default="n").lower().startswith("y"):
+                return 1
+        elif not args.force:
+            print("  비대화형에서는 중단합니다. 의도한 것이면 --force 를 붙입니다.")
+            return 1
 
     company = args.company
     if interactive and not company:
@@ -235,6 +302,9 @@ def main():
     # 3) 백엔드 성질 주입
     inject_storage_section(vault, storage)
 
+    # 3.4) 워크스페이스 루트 생성 — 개발이 실제로 일어나는 곳
+    make_workspace_root(ws, company)
+
     # 3.5) Obsidian 볼트로 즉시 열 수 있게
     write_obsidian_config(vault, company)
 
@@ -243,6 +313,10 @@ def main():
 
 vaultos_version: {open(os.path.join(HERE, 'VERSION')).read().strip()}
 initialized: {date.today().isoformat()}
+
+paths:
+  vault: {vault}              # 관리 디렉터리 — 클라우드 동기화, Obsidian이 여는 곳
+  workspace_root: {ws}        # 개발 디렉터리 — 로컬, git으로 관리
 
 storage:
   backend: {storage}          # {STORAGE[storage]['label']}
@@ -292,13 +366,19 @@ workspaces:
           "파일명: `YYYY-MM-DD_<주제>.md`\n\n**끝난 것은 끝났다고 적는다.** "
           "조건부 항목을 미완 과제처럼 남겨두지 않는다.\n")
 
-    print(f"\nVaultOS를 만들었습니다: {vault}")
-    print(f"  백엔드: {STORAGE[storage]['label']}")
-    print(f"  워크스페이스: personal{' + company' if company else ''}")
+    cfg = os.path.expanduser("~/.config/vaultos/config")
+    os.makedirs(os.path.dirname(cfg), exist_ok=True)
+    write(cfg, f"vault: {vault}\nworkspace_root: {ws}\n")
+
+    print(f"\nVaultOS를 만들었습니다.")
+    print(f"  관리 디렉터리   {vault}")
+    print(f"  워크스페이스    {ws}")
+    print(f"  백엔드          {STORAGE[storage]['label']}")
+    print(f"  범위            personal{' + company' if company else ''}")
     print("\n다음:")
     print(f"  1. Obsidian에서 이 폴더를 볼트로 엽니다 (.obsidian 설정 생성됨)")
     print(f"  2. 00_SYSTEM/VAULTOS.md 를 읽습니다")
-    print(f"  3. 구조 검사: python3 {os.path.join(HERE, 'tools/vaultos_health.py')} \"{vault}\"")
+    print(f"  3. 새 프로젝트: vaultos new <slug>   → {ws}/personal/<slug> 에 생성됩니다")
     return 0
 
 

@@ -107,6 +107,23 @@ def find_vault(explicit=None, quiet=False):
     return None
 
 
+def find_workspace_root(vault=None):
+    """개발 워크스페이스 루트. 설정 → 볼트 config → 기본값 순."""
+    env = os.environ.get("VAULTOS_WORKSPACE")
+    if env:
+        return os.path.abspath(os.path.expanduser(env))
+    if os.path.isfile(CONFIG):
+        with open(CONFIG, encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("workspace_root:"):
+                    return os.path.abspath(os.path.expanduser(line.split(":", 1)[1].strip()))
+    if vault:
+        p = read_nested(os.path.join(vault, "00_SYSTEM", "vault-config.yaml"), "paths", "workspace_root")
+        if p:
+            return os.path.abspath(os.path.expanduser(p))
+    return os.path.abspath(os.path.expanduser("~/workspace/projects"))
+
+
 def require_vault(args):
     v = find_vault(getattr(args, "vault", None))
     if not v:
@@ -197,10 +214,13 @@ def cmd_config(args):
     if not _is_vault(p):
         print(f"VaultOS 볼트가 아닙니다 (00_SYSTEM/VAULTOS.md 없음): {p}")
         return 1
+    ws = os.path.abspath(os.path.expanduser(args.workspace)) if args.workspace \
+        else find_workspace_root(p)
     os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
     with open(CONFIG, "w", encoding="utf-8") as fh:
-        fh.write(f"vault: {p}\n")
-    print(f"볼트를 기록했습니다: {p}")
+        fh.write(f"vault: {p}\nworkspace_root: {ws}\n")
+    print(f"볼트         {p}")
+    print(f"워크스페이스  {ws}")
     return 0
 
 
@@ -216,11 +236,25 @@ def cmd_new(args):
         return 1
     os.makedirs(pdir, exist_ok=True)
 
+    profile_pre = args.profile or ("company-standard" if args.company else "personal-light")
     repo_url = args.repo or ""
-    repo_local = os.path.abspath(args.path) if args.path else ""
+    if args.path:
+        repo_local = os.path.abspath(os.path.expanduser(args.path))
+    elif args.no_repo:
+        repo_local = ""
+    else:
+        # 워크스페이스 루트 아래에 개발 디렉터리를 만든다
+        ws_root = find_workspace_root(vault)
+        repo_local = os.path.join(ws_root, scope, slug)
+        if not os.path.isdir(repo_local):
+            os.makedirs(repo_local, exist_ok=True)
+            if git("rev-parse", "--git-dir", cwd=repo_local) is None:
+                subprocess.run(["git", "init", "-q"], cwd=repo_local,
+                               capture_output=True, timeout=10)
+            print(f"개발 디렉터리를 만들었습니다: {repo_local}")
     if repo_local and not repo_url:
         repo_url = git("remote", "get-url", "origin", cwd=repo_local) or ""
-    profile = args.profile or ("company-standard" if args.company else "personal-light")
+    profile = profile_pre
 
     local_block = f"  local:\n    this: {repo_local}\n" if repo_local else "  local: {}\n"
     manifest_text = f"""# 프로젝트 진입점. 에이전트는 이 파일을 먼저 읽는다.
@@ -489,7 +523,8 @@ def cmd_status(args):
     print(f"VaultOS  {vault}")
     backend = read_nested(os.path.join(vault, "00_SYSTEM", "vault-config.yaml"), "storage", "backend")
     if backend:
-        print(f"  백엔드  {backend}")
+        print(f"  백엔드      {backend}")
+    print(f"  워크스페이스 {find_workspace_root(vault)}")
     ps = projects(vault)
     if not ps:
         print("\n프로젝트 없음.  vaultos new <slug> 로 시작합니다.")
@@ -582,13 +617,15 @@ def main():
     p.add_argument("--company", action="store_true"); p.add_argument("--force", action="store_true")
     p.set_defaults(fn=cmd_init)
 
-    p = sub.add_parser("config", help="볼트 위치를 기록")
+    p = sub.add_parser("config", help="볼트와 워크스페이스 위치를 기록")
     p.add_argument("--vault", dest="vault")
+    p.add_argument("--workspace", help="개발 워크스페이스 루트")
     p.set_defaults(fn=cmd_config)
 
     p = sub.add_parser("new", help="프로젝트 등록 (볼트 + 저장소 연결)")
     p.add_argument("slug"); p.add_argument("--name"); p.add_argument("--mission")
-    p.add_argument("--path", help="연결할 저장소 경로")
+    p.add_argument("--path", help="저장소 경로 (생략하면 워크스페이스 루트에 생성)")
+    p.add_argument("--no-repo", action="store_true", help="코드 저장소 없이 볼트에만 등록")
     p.add_argument("--repo", help="저장소 URL")
     p.add_argument("--profile"); p.add_argument("--company", action="store_true")
     p.set_defaults(fn=cmd_new)

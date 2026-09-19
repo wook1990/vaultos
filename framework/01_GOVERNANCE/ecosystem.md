@@ -28,6 +28,49 @@ updated: 2026-09-19
 
 마지막 항목이 핵심이다. **복제는 연결 장치가 없을 때 나오는 증상이다.**
 
+## 1.2 VaultOS는 두 경로를 안다
+
+VaultOS를 구성하면 **디렉터리 두 개가 생긴다.**
+
+```
+관리 디렉터리 (볼트)        클라우드 동기화 안. Obsidian이 여는 곳
+프로젝트 워크스페이스 루트   로컬. 개발이 실제로 일어나는 곳
+```
+
+```sh
+python3 init.py
+#  볼트 경로       → ~/Library/CloudStorage/.../vault
+#  워크스페이스 루트 → ~/workspace/projects
+```
+
+두 경로는 `00_SYSTEM/vault-config.yaml`의 `paths:` 와 `~/.config/vaultos/config` 양쪽에 기록된다.
+
+```
+<workspace_root>/
+├── personal/<slug>/    개인 프로젝트 저장소
+└── company/<slug>/     회사 프로젝트 저장소
+```
+
+볼트의 `02_WORKSPACES/{personal,company}` 와 같은 모양이다. **개인/회사 경계가 파일시스템에서도 갈린다.**
+
+### 워크스페이스를 클라우드에 두지 않는다
+
+`init`이 클라우드 경로를 감지하면 경고하고, 비대화형에서는 중단한다(`--force`로 우회).
+
+이유: `.git` 내부가 동기화되면 두 기기가 경쟁할 때 저장소가 깨진다. 빌드 산출물과 의존성 폴더도 충돌한다.
+**코드는 git으로, 문서는 클라우드로.**
+
+### 프로젝트를 만들면 개발 디렉터리가 생긴다
+
+```sh
+vaultos new my-app
+#  <workspace_root>/personal/my-app/  생성 + git init
+#  계약 표면 고정 (.vaultos/, tracker/, 진입점, hook)
+#  볼트에 프로젝트 등록
+```
+
+경로를 손으로 지정할 필요가 없다. `--path`로 기존 저장소를 쓰거나 `--no-repo`로 볼트에만 등록할 수도 있다.
+
 ## 1.5 워크스페이스는 계약 종속이다
 
 프로젝트 워크스페이스는 코드만 있는 곳이 아니다.
