@@ -21,6 +21,7 @@ updated: 2026-09-19
 | [[01_GOVERNANCE/data-policy\|data-policy]] | Project/Knowledge 경계, Personal/Company 경계, Data Classification, Secret 관리 |
 | [[01_GOVERNANCE/agent-policy\|agent-policy]] | 에이전트 공통 계약, 절대 금지 12항, 세션 경계 sync 규칙 |
 | [[01_GOVERNANCE/knowledge-policy\|knowledge-policy]] | 지식 수집·정제·승격 규칙, AI Curation/Caution 라우팅 |
+| [[01_GOVERNANCE/grill-gate\|grill-gate]] | 만들기 전에 캐묻는다. success criteria는 요구사항의 일부 |
 | [[01_GOVERNANCE/ecosystem\|ecosystem]] | 볼트와 저장소를 잇는 양방향 표식, 볼트 탐색 순서, 상태 흐름 방향 |
 | [[01_GOVERNANCE/sync-policy\|sync-policy]] | 정본 계층(Drive vs git), Drive 충돌 방지 규칙, 백업·롤백 |
 | [[01_GOVERNANCE/vaultos-health\|vaultos-health]] | 볼트 자체의 유지보수 리듬, lint 항목, 재발 경보 |

@@ -325,6 +325,85 @@ def cmd_link(args):
     return 0
 
 
+def cmd_grill(args):
+    """소스 수집 → 캐묻기 → 요구사항·task·타임라인 생성 → 볼트 연동."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("grill", os.path.join(HERE, "grill.py"))
+    g = importlib.util.module_from_spec(spec); spec.loader.exec_module(g)
+
+    vault = require_vault(args)
+    found = [(sc, sl, d) for sc, sl, d in projects(vault) if sl == args.slug]
+    if not found:
+        print(f"볼트에 그런 프로젝트가 없습니다: {args.slug}")
+        print("  vaultos new <slug> 로 먼저 등록합니다.")
+        return 1
+    scope, slug, pdir = found[0]
+    manifest = os.path.join(pdir, "project.yaml")
+    name = read_nested(manifest, "project", "name") or slug
+
+    # 1) 소스 수집
+    files = facts = None
+    mode = "grill-me"
+    prefill = {}
+    if args.docs:
+        doc_dir = os.path.abspath(os.path.expanduser(args.docs))
+        if not os.path.isdir(doc_dir):
+            print(f"소스 경로가 없습니다: {doc_dir}")
+            return 1
+        mode = "grill-with-docs"
+        files, facts = g.scan_docs(doc_dir)
+        print(f"소스 {len(files)}개에서 후보 {len(facts)}건을 뽑았습니다.")
+        heads = [t for _, k, t in facts if k == "heading"]
+        if heads:
+            prefill["outcome"] = heads[0]
+        g.write_sources(pdir, mode, doc_dir, files, facts)
+    else:
+        g.write_sources(pdir, mode)
+
+    # 2) 캐묻기
+    ans = g.run_grill({}, interactive=not args.non_interactive, prefill=prefill)
+    status, missing = g.gate_status(ans)
+    g.write_grill(pdir, ans, status, missing, mode)
+
+    # 3) 산출물
+    g.write_constitution(pdir, name, ans)
+    dom = re.sub(r"[^A-Z0-9]", "", slug.upper())[:6] or "CORE"
+    req_ids = g.write_requirements(pdir, slug, ans)
+    g.write_timeline(pdir, name, ans)
+
+    repo_local = None
+    m = re.search(r"this:\s*(\S+)", open(manifest, encoding="utf-8").read())
+    if m:
+        repo_local = m.group(1)
+    tpath = g.write_tasks(repo_local, ans, req_ids, dom)
+
+    # 4) project.yaml에 게이트 상태 기록
+    s2 = open(manifest, encoding="utf-8").read()
+    if "grill:" in s2:
+        s2 = re.sub(r"^grill:.*$", f"grill: {status}", s2, count=1, flags=re.M)
+    else:
+        s2 = s2.replace("governance_profile:", f"grill: {status}   # Grill Gate. pending이면 구현을 시작하지 않는다\n\ngovernance_profile:", 1)
+    if req_ids:
+        s2 = re.sub(r"^critical_requirements:.*$",
+                    "critical_requirements: [" + ", ".join(req_ids) + "]", s2, count=1, flags=re.M)
+    if status == "complete":
+        s2 = re.sub(r"^(\s*)phase:\s*idea\s*$", r"\1phase: planning", s2, count=1, flags=re.M)
+    open(manifest, "w", encoding="utf-8").write(s2)
+
+    print(f"\nGrill Gate: {status}")
+    print(f"  intake/sources.md")
+    print(f"  intake/grill.md")
+    print(f"  governance/constitution.md")
+    print(f"  requirements/requirements.yaml   ({len(req_ids)}개 REQ)")
+    print(f"  status/timeline.md               (mermaid gantt)")
+    if tpath:
+        print(f"  {tpath}")
+    if status != "complete":
+        print(f"\n  미응답 필수 항목: {', '.join(missing)}")
+        print("  게이트가 pending인 동안은 구현을 시작하지 않습니다.")
+    return 0
+
+
 def cmd_status(args):
     """지금 무엇이 어디까지 됐는지 한 화면으로."""
     vault = require_vault(args)
@@ -340,11 +419,13 @@ def cmd_status(args):
     for scope, slug, d in ps:
         manifest = os.path.join(d, "project.yaml")
         profile = read_yaml_scalar(manifest, "governance_profile") or "-"
+        grill = read_yaml_scalar(manifest, "grill")
         phase = read_nested(manifest, "status", "phase") or "-"
         url = read_nested(manifest, "repo", "url") or ""
         local = read_nested(manifest, "repo", "local") or read_nested(manifest, "local", "this") or ""
         print(f"  [{scope}] {slug}")
-        print(f"      profile {profile:<18} phase {phase}")
+        gmark = "" if grill in (None, "complete") else f"   [Grill {grill} — 구현 시작 전]"
+        print(f"      profile {profile:<18} phase {phase}{gmark}")
         if url and url != "null":
             print(f"      repo    {url}")
         # 저장소가 로컬에 있으면 git 상태까지
@@ -436,6 +517,12 @@ def main():
     p = sub.add_parser("link", help="저장소를 볼트 프로젝트에 연결")
     p.add_argument("slug"); p.add_argument("--path")
     p.set_defaults(fn=cmd_link)
+
+    p = sub.add_parser("grill", help="소스 수집 + 캐묻기 → 요구사항·task·타임라인 생성")
+    p.add_argument("slug")
+    p.add_argument("--docs", help="기존 기획서·RFP·노트가 있는 폴더 (grill-with-docs)")
+    p.add_argument("--non-interactive", action="store_true", help="질문하지 않고 골격만 생성")
+    p.set_defaults(fn=cmd_grill)
 
     p = sub.add_parser("status", help="지금 무엇이 어디까지 됐는지")
     p.set_defaults(fn=cmd_status)

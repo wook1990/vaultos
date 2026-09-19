@@ -143,6 +143,36 @@ def inject_storage_section(vault, storage_key):
     write(path, s)
 
 
+def write_obsidian_config(vault, company):
+    """Obsidian이 바로 열 수 있는 최소 설정. 플러그인 없이도 동작한다."""
+    import json
+    d = os.path.join(vault, ".obsidian")
+    os.makedirs(d, exist_ok=True)
+    conf = {
+        "app.json": {
+            "attachmentFolderPath": "03_KNOWLEDGE/references/_attachments",
+            "alwaysUpdateLinks": True,       # 볼트 안에서 파일을 옮기면 링크를 자동 갱신
+            "newLinkFormat": "absolute",     # 경로 링크를 기본으로 — 구조 이동에 강하다
+            "useMarkdownLinks": False,
+            "promptDelete": False,
+        },
+        "appearance.json": {"accentColor": "", "theme": "obsidian"},
+        "core-plugins.json": {
+            "file-explorer": True, "global-search": True, "switcher": True,
+            "graph": True, "backlink": True, "outgoing-link": True,
+            "tag-pane": True, "page-preview": True, "templates": True,
+            "note-composer": True, "command-palette": True, "outline": True,
+            "word-count": True, "file-recovery": True, "bookmarks": True,
+        },
+        "templates.json": {"folder": "00_SYSTEM/templates"},
+        "hotkeys.json": {},
+    }
+    for name, data in conf.items():
+        with open(os.path.join(d, name), "w", encoding="utf-8") as fh:
+            json.dump(data, fh, ensure_ascii=False, indent=2)
+    os.makedirs(os.path.join(vault, "03_KNOWLEDGE/references/_attachments"), exist_ok=True)
+
+
 def main():
     ap = argparse.ArgumentParser(description="VaultOS 환경을 생성한다")
     ap.add_argument("--path", help="볼트를 만들 경로")
@@ -205,6 +235,9 @@ def main():
     # 3) 백엔드 성질 주입
     inject_storage_section(vault, storage)
 
+    # 3.5) Obsidian 볼트로 즉시 열 수 있게
+    write_obsidian_config(vault, company)
+
     # 4) 볼트 설정 기록
     write(os.path.join(vault, "00_SYSTEM", "vault-config.yaml"), f"""# 이 볼트의 설치 설정. init이 기록한다.
 
@@ -263,7 +296,7 @@ workspaces:
     print(f"  백엔드: {STORAGE[storage]['label']}")
     print(f"  워크스페이스: personal{' + company' if company else ''}")
     print("\n다음:")
-    print(f"  1. Obsidian에서 이 폴더를 볼트로 엽니다")
+    print(f"  1. Obsidian에서 이 폴더를 볼트로 엽니다 (.obsidian 설정 생성됨)")
     print(f"  2. 00_SYSTEM/VAULTOS.md 를 읽습니다")
     print(f"  3. 구조 검사: python3 {os.path.join(HERE, 'tools/vaultos_health.py')} \"{vault}\"")
     return 0
