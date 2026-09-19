@@ -28,6 +28,65 @@ updated: 2026-09-19
 
 마지막 항목이 핵심이다. **복제는 연결 장치가 없을 때 나오는 증상이다.**
 
+## 1.5 워크스페이스는 계약 종속이다
+
+프로젝트 워크스페이스는 코드만 있는 곳이 아니다.
+**VaultOS 계약에 종속되는 기능이 고정으로 설치된 곳**이다.
+
+```sh
+vaultos bind <slug>     # 계약 표면을 고정한다
+```
+
+고정되는 것:
+
+```
+<repo>/
+├── .vaultos/link            볼트 주소와 프로젝트 경로
+├── .vaultos/contract.yaml   따르는 계약 버전·프로필·요구·금지
+├── tracker/                 계약이 정한 5개 스키마 (임의 확장 금지)
+├── AGENTS.md CLAUDE.md GEMINI.md   볼트를 가리키는 진입점 (복사하지 않는다)
+└── .githooks/pre-commit     계약 위반 시 경고
+```
+
+**고정의 뜻**: 이것들이 없거나 어긋나면 `vaultos validate`가 실패한다.
+
+### Grill Gate는 워크스페이스에서 돈다
+
+```sh
+cd <repo>
+vaultos grill            # docs/ 를 자동으로 읽고, 빈 곳만 묻는다
+```
+
+프로젝트가 만들어지는 곳이 워크스페이스이므로 캐묻기도 거기서 한다.
+**그 결과가 계약에 따라 양쪽으로 나뉜다.**
+
+| 산출물 | 어디로 | 왜 |
+|---|---|---|
+| `intake/sources.md` `intake/grill.md` | 볼트 | 무엇을 왜 만들기로 했는가 = 의도 |
+| `governance/constitution.md` | 볼트 | 불변 원칙 |
+| `requirements/requirements.yaml` | 볼트 | 요구사항 |
+| `status/timeline.md` | 볼트 | 진행 상태 |
+| `tracker/tasks.yaml` | **워크스페이스** | 실행 정본 |
+
+### 계약 검사
+
+```sh
+vaultos validate
+```
+
+| 검사 | 등급 |
+|---|---|
+| tracker 5개 스키마 존재 | 위반 |
+| 의도 문서가 저장소에 있음 (roadmap, product-brief 등) | 위반 |
+| 볼트 계약 문서 존재 (프로필별) | 위반 |
+| Grill Gate가 `pending` | 위반 — **구현을 시작하지 않는다** |
+| Requirement에 연결되지 않은 task | 위반 |
+| Evidence 없이 `done`인 task | 위반 |
+| tracker를 임의로 늘림 | 경고 |
+| task로 이어지지 않은 Requirement | 경고 |
+
+**차단이 아니라 보이게 하는 것이 목적이다.** 사람이 보고 멈춘다.
+
 ## 2. 양방향 표식
 
 연결은 두 개의 작은 파일로 이뤄진다. 둘 다 내용을 복사하지 않고 **주소만** 담는다.

@@ -38,12 +38,28 @@ python3 init.py --path ~/Dropbox/vault --storage dropbox --company
 ```sh
 vaultos config --vault <볼트경로>        # 볼트 위치 한 번 기록
 
-vaultos new my-app --path ~/work/my-app  # 볼트 등록 + 저장소 연결을 한 번에
-vaultos link my-app                      # 이미 있는 저장소를 나중에 연결
+# 워크스페이스에서
+vaultos new my-app --path .              # 볼트 등록 + 계약 표면 고정
+vaultos grill                            # Grill Gate — docs/ 를 읽고 빈 곳만 묻는다
+vaultos validate                         # 계약 준수 검사
+vaultos sync                             # 세션 종료 시 1회, 볼트에 요약만
+
+# 볼트에서
 vaultos status                           # 지금 무엇이 어디까지 됐는지
-vaultos sync                             # 저장소 tracker → 볼트 상태 요약
-vaultos check                            # 구조 검사
+vaultos check                            # 볼트 구조 검사
 ```
+
+**프로젝트 워크스페이스는 코드만 있는 곳이 아니다.** `vaultos bind`가 계약 종속 기능을 고정한다.
+
+```
+<repo>/.vaultos/link + contract.yaml   볼트 주소와 따르는 계약
+<repo>/tracker/                        계약이 정한 5개 스키마 (임의 확장 금지)
+<repo>/AGENTS.md CLAUDE.md GEMINI.md   볼트를 가리키는 진입점 (복사하지 않는다)
+<repo>/.githooks/pre-commit            계약 위반 시 경고
+```
+
+`vaultos validate`가 잡는 것: Grill 미완료 / Requirement 없는 task / Evidence 없는 done /
+의도 문서가 저장소에 있음 / tracker 임의 확장.
 
 `vaultos new`는 두 개의 표식을 만든다. **둘 다 내용을 복사하지 않고 주소만 담는다.**
 
