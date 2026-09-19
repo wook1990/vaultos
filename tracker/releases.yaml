@@ -1,0 +1,9 @@
+releases:
+  - id: REL-001
+    name: v0.1.0 structure-lint
+    status: released
+    target_date: 2026-09-19
+    released_at: 2026-09-19
+    included_tasks: [TASK-LINT-001, TASK-LINT-002, TASK-LINT-003]
+    known_risks:
+      - 링크 해석 규칙이 Obsidian 실제 동작과 완전히 일치하는지 미검증

@@ -31,11 +31,34 @@ python3 init.py
 python3 init.py --path ~/Dropbox/vault --storage dropbox --company
 ```
 
-설치 후 구조 검사:
+## 프로젝트를 볼트에 연동한다
+
+이 프레임워크의 핵심이다. **저장소가 자기 볼트를 찾고, 볼트가 자기 저장소를 안다.**
 
 ```sh
-python3 tools/vaultos_health.py <볼트경로>
+vaultos config --vault <볼트경로>        # 볼트 위치 한 번 기록
+
+vaultos new my-app --path ~/work/my-app  # 볼트 등록 + 저장소 연결을 한 번에
+vaultos link my-app                      # 이미 있는 저장소를 나중에 연결
+vaultos status                           # 지금 무엇이 어디까지 됐는지
+vaultos sync                             # 저장소 tracker → 볼트 상태 요약
+vaultos check                            # 구조 검사
 ```
+
+`vaultos new`는 두 개의 표식을 만든다. **둘 다 내용을 복사하지 않고 주소만 담는다.**
+
+```
+저장소/.vaultos              →  볼트 위치와 프로젝트 경로
+볼트/…/project.yaml의 repo   →  저장소 URL과 기기별 clone 위치
+```
+
+이 배선이 있으면 어느 저장소에서 일하는 에이전트든 **의도 계층(Requirement / ADR / 정책)을 찾아간다.**
+없으면 각자 자기 저장소에 계약 사본을 만들기 시작하고, 사본은 곧 갈라진다.
+
+볼트를 찾는 순서: `--vault` → `VAULTOS_HOME` → 저장소의 `.vaultos` → `~/.config/vaultos/config` → 클라우드 경로 탐색.
+**경로를 하드코딩하지 않는다.**
+
+→ [framework/01_GOVERNANCE/ecosystem.md](framework/01_GOVERNANCE/ecosystem.md)
 
 ## 만들어지는 구조
 
@@ -105,9 +128,10 @@ python3 tools/vaultos_health.py <볼트경로>
 init.py                  환경 생성
 framework/               볼트에 배치될 문서 원본
   00_SYSTEM/             규약·스키마·템플릿
-  01_GOVERNANCE/         정책 10개
+  01_GOVERNANCE/         정책 11개 (ecosystem 포함)
   04_AGENTS/             역할 계약 (orchestrator / developer / auditor / pm / curation)
   05_OPERATIONS/         대시보드·리뷰 보드
+vaultos                  CLI — 볼트 탐색, 프로젝트 연동, 상태 동기화
 tools/vaultos_health.py  구조 검사 (읽기 전용, 의존성 없음)
 docs/CASE-STUDY.md       설계 근거
 ```

@@ -112,6 +112,7 @@ Repo     = Execution SSOT  실제로 무엇이 만들어졌는가 (Code / Test /
 - 프로젝트 작업: [[05_OPERATIONS/dashboard/10_projects|Project Dashboard]]
 - 지식 정리: [[05_OPERATIONS/dashboard/20_knowledge|Knowledge Dashboard]]
 - 규칙 확인: [[01_GOVERNANCE/README|Governance]]
+- 저장소 연결: [[01_GOVERNANCE/ecosystem|Ecosystem]] — `vaultos link` / `vaultos sync`
 - 새 문서 만들기: [[00_SYSTEM/conventions|Conventions]]
 
 ## 8. 이 구조의 이력

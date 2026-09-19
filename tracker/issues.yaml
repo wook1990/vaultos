@@ -1,0 +1,40 @@
+issues:
+  - id: ISSUE-001
+    title: lint의 프로필별 필수 파일 정의가 project-policy.md와 불일치
+    severity: high
+    status: fixed
+    owner: developer
+    description: >
+      01_GOVERNANCE/project-policy.md는 personal-light의 구조를
+      project.yaml + governance/constitution.md + status/current-state.yaml 세 개로 정의한다.
+      그러나 src/vaultos_health.py의 PROFILE_REQUIRED_FILES는 personal-light에
+      project.yaml 하나만 요구한다. 검사기가 정책보다 느슨하다.
+    root_cause: >
+      구현 시 project-policy.md의 §2 표가 아니라 §3 personal-light 구조 설명을 기억에 의존해 옮겼다.
+      정책 문서를 열어 대조하지 않았다.
+    impact: personal-light 프로젝트가 필수 파일 없이도 통과한다. 검사기가 drift를 놓친다.
+    related_tasks: [TASK-LINT-003]
+    requirement_ids: [REQ-LINT-003]
+    mitigation: PROFILE_REQUIRED_FILES를 정책 문서 기준으로 맞추고 회귀 테스트를 추가한다.
+    fix_evidence: >
+      src/vaultos_health.py PROFILE_REQUIRED_FILES를 project-policy.md §2 기준으로 수정하고
+      출처 주석을 달았다. tests의 test_personal_light도_constitution과_current_state를_요구한다 /
+      test_personal_full은_requirements까지_요구한다 2건으로 회귀를 고정했다. 20건 전부 PASS.
+
+  - id: ISSUE-002
+    title: 코드 스팬/펜스 안의 위키링크를 실제 링크로 오탐
+    severity: medium
+    status: fixed
+    owner: developer
+    description: >
+      링크를 예시로 인용하는 문서(마이그레이션 회고 등)에서 백틱 안의 [[...]]를
+      실제 링크로 판정해 error로 보고했다. Obsidian은 코드 스팬/펜스 안의 위키링크를
+      해석하지 않으므로 검사기 쪽 오류다.
+    root_cause: 링크 정규식을 원문 전체에 그대로 적용했다. 마크다운 코드 영역을 고려하지 않았다.
+    impact: PKM 자체를 다루는 볼트에서는 링크를 인용하는 문서가 흔하다. 오탐이 누적되면 error 신호를 무시하게 된다.
+    related_tasks: [TASK-LINT-002]
+    requirement_ids: [REQ-LINT-002]
+    discovered_by: 자기 검사 — 이 프로젝트의 회고 문서를 쓰자마자 검출됨
+    fix_evidence: >
+      strip_code()로 펜스(```/~~~)와 인라인 코드를 제거한 뒤 링크를 스캔한다.
+      회귀 테스트 3건(인라인/펜스/코드 밖 정상 검출) 추가. 23건 전부 PASS.

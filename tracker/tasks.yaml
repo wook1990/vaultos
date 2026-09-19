@@ -1,0 +1,47 @@
+tasks:
+  - id: TASK-LINT-001
+    title: 루트 구조 검사 구현
+    status: done
+    priority: high
+    owner: developer
+    requirement_ids: [REQ-LINT-001]
+    related_decisions: [ADR-001]
+    branch: main
+    definition_of_done:
+      - 표준 루트 8개 존재 여부 개별 보고
+      - VAULTOS.md / 필수 governance 문서 부재를 error로 보고
+      - 루트 loose file을 warn으로 보고
+    evidence: 
+      - evidence/tests/unittest-20260919.log (RootStructure 5건 PASS); evidence/tests/vault-scan-20260919.log (실제 볼트 error 0)
+
+  - id: TASK-LINT-002
+    title: 깨진 위키링크 검출 구현
+    status: done
+    priority: high
+    owner: developer
+    requirement_ids: [REQ-LINT-002]
+    related_decisions: [ADR-001]
+    branch: main
+    definition_of_done:
+      - 경로 링크와 파일명 링크 모두 해석
+      - 표 이스케이프(\|)와 템플릿 치환자 오탐 없음
+      - 99_ARCHIVE 기본 제외
+      - 미작성 노트 링크를 별도 등급으로 분리
+    evidence: 
+      - evidence/tests/unittest-20260919.log (Links 8건 PASS); 실제 볼트 깨진 링크 2건 검출 후 수정, 재검사 error 0
+
+  - id: TASK-LINT-003
+    title: 프로젝트 허브 최소 구조 검사 구현
+    status: done
+    priority: medium
+    owner: developer
+    requirement_ids: [REQ-LINT-003]
+    related_decisions: [ADR-001]
+    branch: main
+    definition_of_done:
+      - project.yaml 존재 검사
+      - governance_profile 값 유효성 검사
+      - 프로필별 필수 파일 부재 보고
+      - 프로젝트별 파일 수 보고
+    evidence: 
+      - evidence/tests/unittest-20260919.log (ProjectHub 7건 PASS, ISSUE-001 회귀 포함)

@@ -1,0 +1,6 @@
+# 이 저장소가 속한 VaultOS 프로젝트.
+# 에이전트는 이 파일을 보고 의도 계층(Requirement / ADR / 정책)을 찾는다.
+vault: /mnt/g/내 드라이브/LvUp_Storage/Storage
+workspace: personal
+project: vaultos
+project_path: 02_WORKSPACES/personal/projects/vaultos

@@ -1,0 +1,458 @@
+#!/usr/bin/env python3
+"""vaultos — 볼트와 작업 저장소를 잇는 CLI.
+
+이 도구의 존재 이유는 하나다.
+**저장소가 자기 볼트를 찾을 수 있게, 볼트가 자기 저장소들을 알 수 있게 한다.**
+
+    vaultos init     볼트 환경 생성
+    vaultos new      새 프로젝트 등록 (볼트 + 저장소 양쪽)
+    vaultos link     기존 저장소를 볼트 프로젝트에 연결
+    vaultos status   지금 무엇이 어디까지 됐는지
+    vaultos check    구조 검사
+    vaultos sync     저장소 tracker → 볼트 상태 요약 (세션 종료 시 1회)
+
+볼트 위치를 찾는 순서:
+    1. --vault 인자
+    2. VAULTOS_HOME 환경변수
+    3. 현재 저장소의 .vaultos 파일
+    4. ~/.config/vaultos/config
+    5. 흔한 클라우드 경로 탐색
+
+표준 라이브러리만 사용한다.
+"""
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG = os.path.expanduser("~/.config/vaultos/config")
+MARKER = ".vaultos"
+
+CLOUD_HINTS = [
+    "~/Library/CloudStorage",
+    "~/Google Drive",
+    "~/Dropbox",
+    "~/OneDrive",
+    "/mnt/g", "/mnt/c/Users",
+]
+
+
+# ---------------------------------------------------------------- 볼트 찾기
+
+def _is_vault(path):
+    return path and os.path.isfile(os.path.join(path, "00_SYSTEM", "VAULTOS.md"))
+
+
+def _read_marker(start=None):
+    """현재 디렉터리에서 위로 올라가며 .vaultos 를 찾는다."""
+    d = os.path.abspath(start or os.getcwd())
+    while True:
+        p = os.path.join(d, MARKER)
+        if os.path.isfile(p):
+            data = {}
+            with open(p, encoding="utf-8") as fh:
+                for line in fh:
+                    if ":" in line and not line.strip().startswith("#"):
+                        k, v = line.split(":", 1)
+                        data[k.strip()] = v.strip()
+            data["_path"] = p
+            return data
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def _search_clouds():
+    for hint in CLOUD_HINTS:
+        base = os.path.expanduser(hint)
+        if not os.path.isdir(base):
+            continue
+        for root, dirs, _ in os.walk(base):
+            if root.count(os.sep) - base.count(os.sep) > 4:
+                dirs[:] = []
+                continue
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            if _is_vault(root):
+                return root
+    return None
+
+
+def find_vault(explicit=None, quiet=False):
+    if explicit and _is_vault(os.path.expanduser(explicit)):
+        return os.path.abspath(os.path.expanduser(explicit))
+    env = os.environ.get("VAULTOS_HOME")
+    if _is_vault(env):
+        return os.path.abspath(env)
+    marker = _read_marker()
+    if marker and _is_vault(marker.get("vault", "")):
+        return os.path.abspath(marker["vault"])
+    if os.path.isfile(CONFIG):
+        with open(CONFIG, encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("vault:"):
+                    p = os.path.expanduser(line.split(":", 1)[1].strip())
+                    if _is_vault(p):
+                        return p
+    if not quiet:
+        print("볼트를 찾는 중...", file=sys.stderr)
+    found = _search_clouds()
+    if found:
+        return found
+    return None
+
+
+def require_vault(args):
+    v = find_vault(getattr(args, "vault", None))
+    if not v:
+        print("볼트를 찾지 못했습니다.\n")
+        print("다음 중 하나로 알려주세요:")
+        print("  vaultos <명령> --vault <경로>")
+        print("  export VAULTOS_HOME=<경로>")
+        print("  vaultos config --vault <경로>      (~/.config/vaultos/config 에 저장)")
+        sys.exit(2)
+    return v
+
+
+# ---------------------------------------------------------------- 유틸
+
+def read_yaml_scalar(path, key):
+    """의존성 없이 최상위 스칼라만 읽는다."""
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith(f"{key}:"):
+                return line.split(":", 1)[1].split("#")[0].strip() or None
+    return None
+
+
+def read_nested(path, parent, key):
+    """`parent:` 아래 `  key: value` 를 읽는다."""
+    if not os.path.isfile(path):
+        return None
+    inside = False
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith(f"{parent}:"):
+                inside = True
+                continue
+            if inside:
+                if line.strip() and not line.startswith((" ", "\t")):
+                    break
+                m = re.match(rf"\s+{re.escape(key)}:\s*(.*)", line)
+                if m:
+                    return m.group(1).split("#")[0].strip().strip('"') or None
+    return None
+
+
+def projects(vault):
+    out = []
+    for scope in ("personal", "company"):
+        base = os.path.join(vault, "02_WORKSPACES", scope, "projects")
+        if not os.path.isdir(base):
+            continue
+        for slug in sorted(os.listdir(base)):
+            d = os.path.join(base, slug)
+            if os.path.isdir(d) and os.path.isfile(os.path.join(d, "project.yaml")):
+                out.append((scope, slug, d))
+    return out
+
+
+def git(*a, cwd=None):
+    try:
+        r = subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True, timeout=10)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+
+# ---------------------------------------------------------------- 명령
+
+def cmd_init(args):
+    sys.argv = ["init.py"] + (["--path", args.path] if args.path else []) \
+        + (["--storage", args.storage] if args.storage else []) \
+        + (["--company"] if args.company else []) + (["--force"] if args.force else [])
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("initmod", os.path.join(HERE, "init.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m.main()
+
+
+def cmd_config(args):
+    if not args.vault:
+        print(f"현재 설정: {CONFIG}")
+        if os.path.isfile(CONFIG):
+            print(open(CONFIG, encoding="utf-8").read().strip())
+        else:
+            print("  (없음)")
+        return 0
+    p = os.path.abspath(os.path.expanduser(args.vault))
+    if not _is_vault(p):
+        print(f"VaultOS 볼트가 아닙니다 (00_SYSTEM/VAULTOS.md 없음): {p}")
+        return 1
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    with open(CONFIG, "w", encoding="utf-8") as fh:
+        fh.write(f"vault: {p}\n")
+    print(f"볼트를 기록했습니다: {p}")
+    return 0
+
+
+def cmd_new(args):
+    """볼트에 프로젝트를 등록하고, 저장소가 있으면 양방향으로 연결한다."""
+    vault = require_vault(args)
+    scope = "company" if args.company else "personal"
+    slug = args.slug
+    pdir = os.path.join(vault, "02_WORKSPACES", scope, "projects", slug)
+    manifest = os.path.join(pdir, "project.yaml")
+    if os.path.exists(manifest):
+        print(f"이미 있습니다: {manifest}")
+        return 1
+    os.makedirs(pdir, exist_ok=True)
+
+    repo_url = args.repo or ""
+    repo_local = os.path.abspath(args.path) if args.path else ""
+    if repo_local and not repo_url:
+        repo_url = git("remote", "get-url", "origin", cwd=repo_local) or ""
+    profile = args.profile or ("company-standard" if args.company else "personal-light")
+
+    local_block = f"  local:\n    this: {repo_local}\n" if repo_local else "  local: {}\n"
+    manifest_text = f"""# 프로젝트 진입점. 에이전트는 이 파일을 먼저 읽는다.
+
+project:
+  id: {slug.upper()}
+  name: {args.name or slug}
+  slug: {slug}
+
+workspace:
+  type: {scope}
+
+governance_profile: {profile}
+
+mission: {args.mission or '(한 줄로 이 프로젝트가 존재하는 이유)'}
+
+status:
+  phase: idea
+  release: null
+
+next_actions: []
+blocked: []
+
+repo:
+  url: {repo_url or 'null'}
+  branch: main
+{local_block}
+critical_requirements: []
+open_changes: []
+active_adrs: []
+open_risks: []
+"""
+    with open(manifest, "w", encoding="utf-8") as fh:
+        fh.write(manifest_text)
+
+    # 프로필이 요구하는 파일을 함께 만든다 (project-policy.md §2)
+    made = ["project.yaml"]
+    if profile != "personal-light":
+        gov = os.path.join(pdir, "governance"); os.makedirs(gov, exist_ok=True)
+        cpath = os.path.join(gov, "constitution.md")
+        if not os.path.exists(cpath):
+            tpl = os.path.join(HERE, "framework/00_SYSTEM/templates/project/constitution.md")
+            if os.path.isfile(tpl):
+                open(cpath, "w", encoding="utf-8").write(open(tpl, encoding="utf-8").read())
+                made.append("governance/constitution.md")
+        st = os.path.join(pdir, "status"); os.makedirs(st, exist_ok=True)
+        spath = os.path.join(st, "current-state.yaml")
+        if not os.path.exists(spath):
+            open(spath, "w", encoding="utf-8").write(
+                "# 현재 상태 — 최소로 유지한다. 이력은 여기 쌓지 않는다.\n\n"
+                "phase: idea\n\ncurrent_feature: []\n\nblocked: []\n\n"
+                "pending_approval: []\n\nopen_risks: []\n\nnext: []\n")
+            made.append("status/current-state.yaml")
+        req = os.path.join(pdir, "requirements"); os.makedirs(req, exist_ok=True)
+        rpath = os.path.join(req, "requirements.yaml")
+        if not os.path.exists(rpath):
+            open(rpath, "w", encoding="utf-8").write("requirements: []\n")
+            made.append("requirements/requirements.yaml")
+
+    print(f"볼트에 등록했습니다: 02_WORKSPACES/{scope}/projects/{slug}/")
+    for f in made:
+        print(f"  + {f}")
+
+    if repo_local and os.path.isdir(repo_local):
+        write_marker(repo_local, vault, scope, slug)
+        print(f"저장소에 연결 표식을 만들었습니다: {os.path.join(repo_local, MARKER)}")
+    return 0
+
+
+def write_marker(repo_path, vault, scope, slug):
+    with open(os.path.join(repo_path, MARKER), "w", encoding="utf-8") as fh:
+        fh.write(f"""# 이 저장소가 속한 VaultOS 프로젝트.
+# 에이전트는 이 파일을 보고 의도 계층(Requirement / ADR / 정책)을 찾는다.
+vault: {vault}
+workspace: {scope}
+project: {slug}
+project_path: 02_WORKSPACES/{scope}/projects/{slug}
+""")
+
+
+def cmd_link(args):
+    """이미 있는 저장소를 이미 있는 볼트 프로젝트에 연결한다."""
+    vault = require_vault(args)
+    repo_path = os.path.abspath(args.path or os.getcwd())
+    found = [(s, g, d) for s, g, d in projects(vault) if g == args.slug]
+    if not found:
+        print(f"볼트에 그런 프로젝트가 없습니다: {args.slug}")
+        print("  vaultos new 로 먼저 등록하거나, vaultos status 로 목록을 봅니다.")
+        return 1
+    scope, slug, pdir = found[0]
+    write_marker(repo_path, vault, scope, slug)
+
+    # 볼트 쪽에도 저장소 주소를 남긴다 (양방향)
+    manifest = os.path.join(pdir, "project.yaml")
+    url = git("remote", "get-url", "origin", cwd=repo_path) or ""
+    s = open(manifest, encoding="utf-8").read()
+    if url and re.search(r"^\s*url:\s*(null)?\s*$", s, re.M):
+        s = re.sub(r"^(\s*)url:\s*(null)?\s*$", rf"\1url: {url}", s, count=1, flags=re.M)
+    if "local:" in s and repo_path not in s:
+        s = re.sub(r"^(\s*)local:\s*\{\}\s*$", rf"\1local:\n\1  this: {repo_path}", s, count=1, flags=re.M)
+    open(manifest, "w", encoding="utf-8").write(s)
+
+    print(f"연결했습니다.\n  저장소: {repo_path}\n  볼트:   {os.path.relpath(pdir, vault)}")
+    return 0
+
+
+def cmd_status(args):
+    """지금 무엇이 어디까지 됐는지 한 화면으로."""
+    vault = require_vault(args)
+    print(f"VaultOS  {vault}")
+    backend = read_nested(os.path.join(vault, "00_SYSTEM", "vault-config.yaml"), "storage", "backend")
+    if backend:
+        print(f"  백엔드  {backend}")
+    ps = projects(vault)
+    if not ps:
+        print("\n프로젝트 없음.  vaultos new <slug> 로 시작합니다.")
+        return 0
+    print(f"\n프로젝트 {len(ps)}개\n")
+    for scope, slug, d in ps:
+        manifest = os.path.join(d, "project.yaml")
+        profile = read_yaml_scalar(manifest, "governance_profile") or "-"
+        phase = read_nested(manifest, "status", "phase") or "-"
+        url = read_nested(manifest, "repo", "url") or ""
+        local = read_nested(manifest, "repo", "local") or read_nested(manifest, "local", "this") or ""
+        print(f"  [{scope}] {slug}")
+        print(f"      profile {profile:<18} phase {phase}")
+        if url and url != "null":
+            print(f"      repo    {url}")
+        # 저장소가 로컬에 있으면 git 상태까지
+        m = re.search(r"this:\s*(\S+)", open(manifest, encoding="utf-8").read())
+        path = m.group(1) if m else local
+        if path and os.path.isdir(path):
+            branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=path) or "-"
+            dirty = git("status", "--porcelain", cwd=path)
+            state = f"{branch}" + (f"  (미커밋 {len(dirty.splitlines())}건)" if dirty else "  (clean)")
+            print(f"      local   {path}  [{state}]")
+        print()
+    return 0
+
+
+def cmd_check(args):
+    vault = require_vault(args)
+    sys.argv = ["vaultos_health.py", vault]
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "health", os.path.join(HERE, "tools", "vaultos_health.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m.main(sys.argv)
+
+
+def cmd_sync(args):
+    """저장소 tracker를 읽어 볼트 project.yaml의 상태 요약만 갱신한다.
+
+    복제하지 않는다. task 목록을 옮겨 적지 않고 개수와 다음 할 일만 남긴다.
+    """
+    vault = require_vault(args)
+    repo_path = os.path.abspath(args.path or os.getcwd())
+    marker = _read_marker(repo_path)
+    if not marker:
+        print(f"이 저장소는 볼트에 연결돼 있지 않습니다: {repo_path}")
+        print("  vaultos link <slug> 로 먼저 연결합니다.")
+        return 1
+    pdir = os.path.join(vault, marker["project_path"])
+    manifest = os.path.join(pdir, "project.yaml")
+    tasks_file = os.path.join(repo_path, "tracker", "tasks.yaml")
+    if not os.path.isfile(tasks_file):
+        print(f"tracker/tasks.yaml 이 없습니다: {repo_path}")
+        return 1
+
+    text = open(tasks_file, encoding="utf-8").read()
+    ids = re.findall(r"^\s*-\s*id:\s*(\S+)", text, re.M)
+    statuses = re.findall(r"^\s*status:\s*(\S+)", text, re.M)
+    done = sum(1 for s in statuses if s in ("done", "completed"))
+    blocked = [i for i, s in zip(ids, statuses) if s == "blocked"]
+    nxt = [i for i, s in zip(ids, statuses) if s in ("ready", "in_progress", "active", "planned")][:3]
+
+    s = open(manifest, encoding="utf-8").read()
+    s = re.sub(r"^next_actions:.*(\n  - .*)*",
+               "next_actions:" + ("".join(f"\n  - {i}" for i in nxt) if nxt else " []"), s, count=1, flags=re.M)
+    s = re.sub(r"^blocked:.*(\n  - .*)*",
+               "blocked:" + ("".join(f"\n  - {i}" for i in blocked) if blocked else " []"), s, count=1, flags=re.M)
+    open(manifest, "w", encoding="utf-8").write(s)
+
+    print(f"동기화했습니다  {marker['project']}")
+    print(f"  task {done}/{len(ids)} 완료")
+    print(f"  다음  {', '.join(nxt) if nxt else '없음'}")
+    if blocked:
+        print(f"  막힘  {', '.join(blocked)}")
+    print("\n정본은 저장소 tracker다. 볼트에는 요약만 남겼다.")
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="vaultos", description="볼트와 작업 저장소를 잇는다")
+    ap.add_argument("--vault", help="볼트 경로 (자동 탐색을 덮어씀)")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("init", help="볼트 환경 생성")
+    p.add_argument("--path"); p.add_argument("--storage")
+    p.add_argument("--company", action="store_true"); p.add_argument("--force", action="store_true")
+    p.set_defaults(fn=cmd_init)
+
+    p = sub.add_parser("config", help="볼트 위치를 기록")
+    p.add_argument("--vault", dest="vault")
+    p.set_defaults(fn=cmd_config)
+
+    p = sub.add_parser("new", help="프로젝트 등록 (볼트 + 저장소 연결)")
+    p.add_argument("slug"); p.add_argument("--name"); p.add_argument("--mission")
+    p.add_argument("--path", help="연결할 저장소 경로")
+    p.add_argument("--repo", help="저장소 URL")
+    p.add_argument("--profile"); p.add_argument("--company", action="store_true")
+    p.set_defaults(fn=cmd_new)
+
+    p = sub.add_parser("link", help="저장소를 볼트 프로젝트에 연결")
+    p.add_argument("slug"); p.add_argument("--path")
+    p.set_defaults(fn=cmd_link)
+
+    p = sub.add_parser("status", help="지금 무엇이 어디까지 됐는지")
+    p.set_defaults(fn=cmd_status)
+
+    p = sub.add_parser("check", help="구조 검사")
+    p.set_defaults(fn=cmd_check)
+
+    p = sub.add_parser("sync", help="저장소 tracker → 볼트 상태 요약")
+    p.add_argument("--path")
+    p.set_defaults(fn=cmd_sync)
+
+    args = ap.parse_args()
+    return args.fn(args)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
