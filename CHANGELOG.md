@@ -21,6 +21,14 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 ### Fixed
 - (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
 
+## [2.2.4] - 2026-09-21
+
+### Fixed
+- `README.md`가 v2.2.0(`07_PRODUCTS`)와 v2.1.0(`03_KNOWLEDGE`, `update-policy.md`) 이후로 갱신되지 않고 있었다 — "만들어지는 구조" 다이어그램에 `06_AUTOMATIONS`/`07_PRODUCTS` 추가, `01_GOVERNANCE` 문서 수 정정(11→13)
+
+### Added
+- `README.md`에 "볼트 구조를 검사한다"(`vaultos_health.py` 실제 사용법), "볼트를 최신 버전으로 맞춘다"(`update-policy.md` 안내) 섹션 신설
+
 ## [2.2.3] - 2026-09-21
 
 실제 vault에 "완전히 개발됐는지" 확인해달라는 요청을 받고 `vaultos_health.py`를 돌려보다가 두 개의 진짜 버그를 발견했다.

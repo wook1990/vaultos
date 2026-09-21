@@ -79,15 +79,19 @@ vaultos check                            # 볼트 구조 검사
 ## 만들어지는 구조
 
 ```
-00_SYSTEM/        볼트 자체 정의, 규약, 스키마, 템플릿, 마이그레이션 기록
+00_SYSTEM/        볼트 자체 정의, 규약, 스키마, 템플릿
 01_GOVERNANCE/    공통 통제 정책 — 프로젝트별로 복사하지 않고 참조한다
 02_WORKSPACES/    personal/ 과 company/ 물리 분리
 03_KNOWLEDGE/     00_inbox → 10_fleeting → 20_permanent + references
 04_AGENTS/        에이전트 역할 계약
 05_OPERATIONS/    사람이 보는 대시보드·리뷰
+06_AUTOMATIONS/   (아직 안 만든다 — 볼트 자체를 검사하는 내부 도구용. 필요해질 때)
+07_PRODUCTS/      배포된 제품·운영 중인 자동화의 상태 (개발 상태가 아니라 운영 상태)
 98_PERSONAL/      업무와 무관한 개인 기록
-99_ARCHIVE/       삭제하지 않고 내리는 곳
+99_ARCHIVE/       삭제하지 않고 내리는 곳 (또는 완전히 지운다 — 프로젝트 규모가 작으면 이력을 안 남기는 것도 선택지다)
 ```
+
+`02_WORKSPACES`가 "지금 만들고 있는 것"이라면 `07_PRODUCTS`는 "지금 실제로 떠 있는 것"이다 — 개발 진행 상태(task/CR/ADR)는 여전히 `02_WORKSPACES` 프로젝트에 남고, 여기는 `live`/`degraded`/`paused`/`retired` 같은 운영 상태 요약만 가진다. `RELEASE`에 도달한 프로젝트를 등록한다.
 
 루트의 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`는 도구가 읽는 진입 포인터다. **계약을 복사하지 않고 `00_SYSTEM/VAULTOS.md`를 가리킨다.**
 
@@ -138,17 +142,35 @@ vaultos check                            # 볼트 구조 검사
 
 > **실패 모드는 "구조 부족"이 아니라 "운영되지 않는 구조의 과잉 생성"이다.**
 
+## 볼트 구조를 검사한다
+
+```sh
+python3 tools/vaultos_health.py <볼트경로>
+# 또는: VAULT_PATH=<볼트경로> python3 tools/vaultos_health.py
+```
+
+읽기 전용, 외부 의존성 없음, 1패스 스캔. 표준 루트 존재 / 필수 문서 존재 / 깨진 위키링크 / 프로젝트 허브 최소 구조를 검사한다. 종료 코드 `0`=문제없음, `1`=error 있음. 자체 테스트: `python3 tools/tests/test_vaultos_health.py`.
+
+## 볼트를 최신 버전으로 맞춘다
+
+이 repo(framework)와 실제로 만든 볼트는 시간이 지나면 벌어진다 — 볼트 쪽에서 규칙을 고치거나, 이 repo에 새 기능이 추가되거나. `VERSION`과 [CHANGELOG.md](CHANGELOG.md)가 이 repo의 버전 정본이고, 어떤 차이가 "당연히 달라야 하는 것"(개인 값, 인스턴스 전용 기록)이고 어떤 차이가 "반영해야 하는 개선"인지의 기준은 [framework/01_GOVERNANCE/update-policy.md](framework/01_GOVERNANCE/update-policy.md)에 있다. 지금은 `vaultos update` 커맨드가 없다 — 파일을 직접 diff해서 손으로 맞춘다(문서에 절차 있음). 자동화는 이 방식을 몇 번 더 해보고 패턴이 안정되면 만든다.
+
 ## 구성
 
 ```
 init.py                  환경 생성
+VERSION                  이 repo의 SemVer 버전
+CHANGELOG.md              버전별 변경 기록
 framework/               볼트에 배치될 문서 원본
   00_SYSTEM/             규약·스키마·템플릿
-  01_GOVERNANCE/         정책 11개 (ecosystem 포함)
+  01_GOVERNANCE/         정책 13개 (ecosystem, update-policy 포함)
+  03_KNOWLEDGE/          지식 계층 안내
   04_AGENTS/             역할 계약 (orchestrator / developer / auditor / pm / curation)
   05_OPERATIONS/         대시보드·리뷰 보드
+  07_PRODUCTS/           배포 제품·자동화 등록 템플릿
 vaultos                  CLI — 볼트 탐색, 프로젝트 연동, 상태 동기화
 tools/vaultos_health.py  구조 검사 (읽기 전용, 의존성 없음)
+tools/tests/             vaultos_health.py 자체 테스트
 docs/CASE-STUDY.md       설계 근거
 ```
 
