@@ -21,6 +21,14 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 ### Fixed
 - (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
 
+## [2.2.2] - 2026-09-21
+
+### Fixed
+- `05_OPERATIONS/dashboard/00_dashboard.md`의 "활성 프로젝트" dataviewjs 블록이 죽은 코드였다 — Dataview는 `.yaml`을 인덱싱하지 않아 `project.yaml`을 절대 찾지 못하는데도 마치 동작하는 것처럼 남아 있었다. 제거하고 `10_projects.md`로 안내만 남겼다
+
+### Added
+- `05_OPERATIONS/dashboard/10_projects.md`에 손으로 유지하는 "전체 프로젝트 한판" 표 추가 — 프로젝트가 늘어도 한 페이지에서 phase/blocked/next_actions/risks를 본다. 자동화(스크립트로 생성)는 프로젝트가 많아져서 손 관리가 아쉬워질 때 추가하기로 미뤘다
+
 ## [2.2.1] - 2026-09-21
 
 ### Fixed

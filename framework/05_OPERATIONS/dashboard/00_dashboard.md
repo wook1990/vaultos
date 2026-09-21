@@ -14,19 +14,7 @@
 
 ## 활성 프로젝트
 
-```dataviewjs
-const rows = [];
-for (const p of dv.pages()) {
-  if (!p.file.path.includes("/projects/")) continue;
-  if (p.file.name !== "project") continue;
-  rows.push([p.file.link, p.status?.phase ?? "-", (p.next_actions ?? []).length]);
-}
-dv.table(["프로젝트", "phase", "다음 할 일"], rows);
-```
-
-> `project.yaml`은 Dataview가 읽지 못한다. 프로젝트 수가 늘면 각 프로젝트에
-> `01_Project_Home.md` 같은 인덱스 노트를 두거나, 이 블록을 지우고 폴더를 직접 연다.
-> **대시보드가 안 돌아간다고 시스템이 멈추지는 않는다.**
+`project.yaml`은 Dataview가 읽지 못해서 여기 자동 표는 없다. 전체 목록은 [[05_OPERATIONS/dashboard/10_projects|Projects Dashboard]]의 손으로 유지하는 한판 표를 본다.
 
 ## 최근 지식 활동
 
