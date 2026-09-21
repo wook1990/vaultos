@@ -21,6 +21,12 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 ### Fixed
 - (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
 
+## [2.2.1] - 2026-09-21
+
+### Fixed
+- `update-policy.md`의 "인스턴스 전용 링크" 예시가 특정 vault의 `00_SYSTEM/migrations/` 경로를 구체적으로 인용하고 있어 일반화 — vault마다 실제로 뭘 인스턴스 기록으로 두는지는 다를 수 있다
+- `07_PRODUCTS/README.md`가 애초에 framework에는 존재한 적 없는 `00_SYSTEM/migrations/2026-09-19_target-architecture.md`(특정 vault의 이행 기록)를 인용하고 있던 것을 정정 (v2.2.0 백포트 시 vault 버전을 그대로 복사하면서 생긴 실수)
+
 ## [2.1.0] - 2026-09-21
 
 vault(`wook1990`의 실제 운영 볼트)에서 먼저 검증된 큐레이션 규칙 개선을 framework로 백포트했다.

@@ -18,7 +18,7 @@ updated: 2026-09-21
 - **배포된 서비스/제품**: 프로젝트가 RELEASE에 도달해서 실제로 사용자가 쓰는 것
 - **운영 중인 자동화**: 일회성 Task가 아니라 계속 돌아가는 프로세스 (스케줄러, 봇, 파이프라인) — 반드시 `02_WORKSPACES` 프로젝트에서 나올 필요는 없다
 
-주의: `06_AUTOMATIONS`(아직 미생성, [[00_SYSTEM/migrations/2026-09-19_target-architecture|이행 기록]] §7 참고)와 다른 것이다. `06_AUTOMATIONS`는 VaultOS **자신**을 검사·관리하는 내부 도구용(drift-detector 등)이고, `07_PRODUCTS`는 **사용자의** 제품·자동화를 위한 것이다.
+주의: `06_AUTOMATIONS`(아직 미생성)와 다른 것이다. `06_AUTOMATIONS`는 VaultOS **자신**을 검사·관리하는 내부 도구용(drift-detector 등)이고, `07_PRODUCTS`는 **사용자의** 제품·자동화를 위한 것이다.
 
 ## 구조
 
