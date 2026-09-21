@@ -39,6 +39,7 @@ Zone C (Knowledge)           03_KNOWLEDGE/ — 프로젝트를 넘어 재사용�
 | `architecture/adr/ADR-xxx.md` | VaultOS | 왜 이 구조를 골랐는가 |
 | `status/current-state.yaml` | VaultOS | 지금 어디쯤인가 — **한 화면 요약** |
 | `evidence/` | VaultOS | 검증 결과의 인덱스 (실제 테스트는 repo) |
+| `07_PRODUCTS/<workspace>/<slug>/product.yaml` | VaultOS | `RELEASE` 도달 후 실제로 떠 있는가 — 개발 상태가 아니라 운영 상태. [[07_PRODUCTS/README\|상세]] |
 
 `current-state.yaml`은 tracker의 복제가 아니다. task 목록을 옮겨 적지 않고 `phase / 막힌 것 / 다음 할 것` 수준만 남긴다.
 

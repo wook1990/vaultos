@@ -17,9 +17,12 @@ updated: 2026-09-19
 03_KNOWLEDGE/     재사용 지식 — 프로젝트 상태와 분리
 04_AGENTS/        에이전트 역할 계약
 05_OPERATIONS/    사람이 보는 통제 화면
+07_PRODUCTS/      배포된 제품·운영 중인 자동화의 상태
 98_PERSONAL/      업무와 무관한 개인 기록
 99_ARCHIVE/       삭제하지 않고 내리는 곳
 ```
+
+`06_AUTOMATIONS/`(VaultOS 자체 검사용 내부 도구)는 아직 없다 — MVP 원칙에 따라 필요해진 시점에 만든다.
 
 루트의 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`는 도구가 읽는 진입 포인터다. 내용을 따로 유지하지 않고 `00_SYSTEM/VAULTOS.md`와 `01_GOVERNANCE/`를 가리킨다.
 
@@ -94,6 +97,15 @@ dashboard/       00_dashboard, 10_projects, 20_knowledge
 reviews/         승격 보드, 리뷰 규칙
 reports/worklog/ 일간·주간·월간 기록
 ```
+
+### 07_PRODUCTS
+
+```text
+personal/<slug>/product.yaml    개인 배포 제품·자동화
+company/<slug>/product.yaml     회사 배포 제품·자동화
+```
+
+`02_WORKSPACES`가 "만들고 있는 것", `07_PRODUCTS`는 "지금 떠 있는 것"이다. 프로젝트가 `RELEASE`에 도달하면 등록한다. 개발 상태(task, CR, ADR)는 여전히 `02_WORKSPACES` 쪽 프로젝트에 남고, 여기는 운영 상태 요약(`live`/`degraded`/`paused`/`retired`)만 가진다. 상세: [[07_PRODUCTS/README|07_PRODUCTS]].
 
 ### 98_PERSONAL / 99_ARCHIVE
 

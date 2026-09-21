@@ -42,9 +42,12 @@ Repo     = Execution SSOT  실제로 무엇이 만들어졌는가 (Code / Test /
 03_KNOWLEDGE/     재사용 지식 (프로젝트 상태와 분리)
 04_AGENTS/        에이전트 역할 계약
 05_OPERATIONS/    사람이 보는 통제 화면 (대시보드 / 리뷰 / 리포트)
+07_PRODUCTS/      배포된 제품·운영 중인 자동화의 상태 (개발 상태가 아니라 운영 상태)
 98_PERSONAL/      업무와 무관한 개인 기록
 99_ARCHIVE/       삭제하지 않고 내리는 곳
 ```
+
+`06_AUTOMATIONS/`(VaultOS 자체를 검사하는 내부 도구용)는 아직 만들지 않는다 — 필요해진 시점에 만든다.
 
 루트의 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`는 도구가 읽는 진입 포인터이며, 내용은 이 문서와 `01_GOVERNANCE/`를 가리킨다.
 
@@ -111,6 +114,7 @@ Repo     = Execution SSOT  실제로 무엇이 만들어졌는가 (Code / Test /
 - 오늘 운영 판단: [[05_OPERATIONS/dashboard/00_dashboard|Dashboard]]
 - 프로젝트 작업: [[05_OPERATIONS/dashboard/10_projects|Project Dashboard]]
 - 지식 정리: [[05_OPERATIONS/dashboard/20_knowledge|Knowledge Dashboard]]
+- 배포된 제품/자동화: [[05_OPERATIONS/dashboard/30_products|Products Dashboard]]
 - 규칙 확인: [[01_GOVERNANCE/README|Governance]]
 - 저장소 연결: [[01_GOVERNANCE/ecosystem|Ecosystem]] — `vaultos link` / `vaultos sync`
 - 프레임워크 버전·업데이트: [[01_GOVERNANCE/update-policy|Update Policy]]

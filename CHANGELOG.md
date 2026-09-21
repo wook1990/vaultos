@@ -8,6 +8,19 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 
 버전과 실제 배포 상태가 어긋난 적이 있었다 — `VAULTOS.md`는 이미 `vaultos_version: 2.0.0`을 선언하고 있었는데 이 파일의 `VERSION`은 `1.0.0`에 머물러 있었다. 2026-09-21 정합화에서 이 어긋남을 바로잡았다. 앞으로는 framework 파일을 바꾸는 커밋에는 반드시 이 파일과 `VERSION`을 같이 갱신한다.
 
+## [2.2.0] - 2026-09-21
+
+`07_PRODUCTS/` 신설 — 배포된 제품과 운영 중인 자동화를 위한 새 계층. 사용자가 붙여넣은 원본 spec(`VaultOS × AIPM-Trace Final Architecture Specification v1.0`)에는 없던 개념으로, Project Lifecycle의 `RELEASE → MAINTENANCE` 단계 이후를 위한 자리가 없다는 실사용 필요에서 신설했다.
+
+### Added
+- `07_PRODUCTS/README.md`, `personal/README.md`, `company/README.md`
+- `00_SYSTEM/templates/product/product.yaml` — 운영 상태 요약 전용 템플릿(개발 상태 복제 금지)
+- `05_OPERATIONS/dashboard/30_products.md`
+- `VAULTOS.md`/`architecture.md`/`naming-rules.md`/`project-policy.md`/`00_dashboard.md`에 `07_PRODUCTS` 반영, `06_AUTOMATIONS`(VaultOS 자체 검사용, 07과 다른 계층)는 여전히 보류 중임을 명시
+
+### Fixed
+- (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
+
 ## [2.1.0] - 2026-09-21
 
 vault(`wook1990`의 실제 운영 볼트)에서 먼저 검증된 큐레이션 규칙 개선을 framework로 백포트했다.

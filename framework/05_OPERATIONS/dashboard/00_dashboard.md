@@ -9,6 +9,7 @@
 
 - [[05_OPERATIONS/dashboard/10_projects|Projects]]
 - [[05_OPERATIONS/dashboard/20_knowledge|Knowledge]]
+- [[05_OPERATIONS/dashboard/30_products|Products]] — 배포된 제품·운영 중인 자동화
 - [[05_OPERATIONS/reviews/promotion-board|Promotion Board]] — 승격 판단 대기열
 
 ## 활성 프로젝트

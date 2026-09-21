@@ -1,0 +1,37 @@
+# 제품/자동화 등록 항목 — 07_PRODUCTS/README.md 참고
+#
+# 이 파일은 개발 진행 상태(task, CR, ADR)를 담지 않는다.
+# 그건 origin_project가 가리키는 02_WORKSPACES 프로젝트에 그대로 남는다.
+# 여기는 "이게 지금 살아있는가, 어디서 왔는가"만 요약한다.
+
+product:
+  id: PROD-KEY               # 대문자 하이픈. 예: PROD-YT-CURATOR
+  name: 제품/자동화 이름
+  slug: product-slug         # 폴더명과 동일
+
+type: service                # service | automation | pipeline | app
+
+workspace:
+  type: personal              # personal | company
+
+origin_project: null          # 이걸 배출한 02_WORKSPACES 프로젝트 slug. 없으면 null
+                              # (예: 프로젝트 없이 바로 만든 자동화)
+
+status:
+  state: live                # live | degraded | paused | retired
+  deployed: YYYY-MM-DD        # 처음 배포/가동된 날
+  last_verified: YYYY-MM-DD   # 마지막으로 "살아있다"를 사람이 확인한 날
+
+owner: null
+
+repo:
+  url: null                   # 정본. 어느 기기에서든 같은 값
+  local: {}                   # 기기별 clone 위치. 정본 아님
+
+# --- 필요할 때만 채운다. 미리 다 채우지 않는다 ---
+
+monitoring:
+  channel: null                # 상태 확인/알림이 어디로 가는가 (없으면 null)
+
+next_actions: []               # 운영 관점 할 일 (배포 파이프라인 개선, 비용 최적화 등)
+                                # 개발 task는 여기 아니라 origin_project의 tracker에 남는다
