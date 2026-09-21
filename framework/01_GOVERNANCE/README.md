@@ -25,6 +25,7 @@ updated: 2026-09-19
 | [[01_GOVERNANCE/ecosystem\|ecosystem]] | 볼트와 저장소를 잇는 양방향 표식, 볼트 탐색 순서, 상태 흐름 방향 |
 | [[01_GOVERNANCE/sync-policy\|sync-policy]] | 정본 계층(Drive vs git), Drive 충돌 방지 규칙, 백업·롤백 |
 | [[01_GOVERNANCE/vaultos-health\|vaultos-health]] | 볼트 자체의 유지보수 리듬, lint 항목, 재발 경보 |
+| [[01_GOVERNANCE/update-policy\|update-policy]] | VaultOS 프레임워크 repo와 이 볼트 사이의 버전·업데이트·백포트 규칙 |
 
 ## 규칙이 아니라 구조를 찾는다면
 

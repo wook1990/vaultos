@@ -25,6 +25,7 @@ KnowledgeOS의 기본 저장 흐름은 다음이다.
 - Fleeting Note는 source 기반 전문 큐레이션 산출물이다.
 - Permanent Note는 사람 승인 후 생성 또는 승격한다.
 - ProjectOS 연결은 제안하되 임의로 프로젝트 문서를 바꾸지 않는다.
+- 지식과 프로젝트의 연결은 **프로젝트 쪽에서 시작한다.** 노트를 만드는 시점에 먼저 활성 프로젝트를 찾아 연결을 만들지 않는다 — `linked_project`가 명시되거나 intent가 `connect_to_project`이거나 source 자체가 특정 프로젝트를 직접 언급하는 경우가 아니면 Project Hooks는 비워둔다. 나중에 프로젝트를 구성할 때 그 프로젝트가 필요한 지식을 찾아 읽는 것이 정상적인 방향이다.
 - 모든 전문 페르소나는 말투가 아니라 역할 계약으로 작동한다.
 
 ## Required Inputs
@@ -140,10 +141,12 @@ Curator는 최종 노트를 내 지식체계에 맞게 재구성한다.
 - my interpretation
 - operational implications
 - permanent note candidates
-- project hooks
+- project hooks — `linked_project`가 명시되었거나 intent가 `connect_to_project`이거나 source가 특정 프로젝트를 직접 언급할 때만 채운다. 그 외에는 비워둔다 (활성 프로젝트를 훑어보며 연결을 찾아 붙이지 않는다)
 - next decision
 
 ## Output Contract
+
+Fleeting Note가 Inbox 원문을 참조할 때(`source_link_path` 등 파일 경로를 쓰는 모든 필드), 그 경로가 실제로 존재하는 Inbox 파일인지 확인한 뒤 쓴다. 파일명을 기억하거나 제목에서 추측해서 만들어 쓰지 않는다 — 이렇게 만든 링크는 Inbox 파일이 실제로 존재하지 않는 broken link가 되고, vaultos_health 검사에서만 뒤늦게 드러난다. `source_path`로 받은 값을 그대로 쓰거나, 확실하지 않으면 Inbox 디렉터리를 실제로 나열해 정확한 파일명을 확보한 뒤 링크를 작성한다.
 
 기본 output은 `00_SYSTEM/templates/14_AI_Curation_Caution_Note.md` 구조를 따른다.
 
@@ -202,6 +205,8 @@ Gemini는 다음을 수행한다.
 ## Do Not
 
 - source를 확인하지 않고 사실처럼 단정하지 않는다.
+- 확인하지 않은 Inbox 파일명을 추측해서 `source_link_path` 등에 쓰지 않는다.
+- `linked_project`가 명시되지 않았는데 활성 프로젝트를 훑어보며 이 노트가 어디에 쓰일지 임의로 찾아 연결하지 않는다. 지식은 프로젝트가 필요할 때 찾아 읽는 대상이지, 생성 시점에 먼저 프로젝트에 끼워 맞추는 대상이 아니다.
 - 유명 컨설팅 브랜드 말투를 흉내 내는 데 집중하지 않는다.
 - caution 없이 Permanent 승격을 제안하지 않는다.
 - 모든 source에 모든 board를 배치하지 않는다.

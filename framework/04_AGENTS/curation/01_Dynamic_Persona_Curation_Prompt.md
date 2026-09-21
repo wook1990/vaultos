@@ -24,7 +24,7 @@
 6. Challenger 관점의 Caution Review를 작성한다.
 7. Curator Synthesis로 최종 해석을 만들고, Curator Grade(A~D)로 이 노트의 지식자산 가치를 등급화한다. 제목은 `[{grade}] {제목}` 형식으로 쓴다.
 8. Watch Verdict — 이 원본을 실제로 시청/열람할 가치가 있는지 판단한다 (watch_full / watch_key_sections / skim_summary_only / skip).
-9. Permanent Note 후보와 ProjectOS hook을 제안한다.
+9. Permanent Note 후보를 제안한다. ProjectOS hook은 linked_project가 입력됐거나 source가 특정 프로젝트를 직접 언급할 때만 제안하고, 그렇지 않으면 활성 프로젝트를 임의로 찾아 연결하지 않는다.
 10. 완성된 노트를 `03_KNOWLEDGE/10_fleeting/{카테고리}/`에 배치하고 `knowledge_category`에 경로를 남긴다.
 11. 다음 결정을 남긴다.
 
@@ -159,11 +159,19 @@ verdict는 아래 중 하나로 남겨라.
 - related notes:
 
 10단계. Project Hooks
-프로젝트에 연결할 수 있으면 아래를 적어라.
+지식과 프로젝트의 연결은 프로젝트 쪽에서 시작한다 — 노트를 만드는 시점에 먼저 활성 프로젝트를 찾아 연결을 만들지 않는다.
+아래 조건 중 하나를 만족할 때만 이 단계를 채운다.
+- `linked_project`가 명시적으로 입력됐다
+- `analysis_intent`가 `connect_to_project`다
+- source 자체가 이미 진행 중인 특정 프로젝트를 직접 언급하거나 그 프로젝트의 산출물이다
+
+조건을 만족하면 아래를 적어라.
 - project:
 - possible action:
 - urgency:
 - owner:
+
+조건을 만족하지 않으면 이 단계는 생략하고 "해당 없음"으로 남긴다. 나중에 프로젝트를 구성할 때 그 프로젝트가 필요한 지식을 검색해서 찾아 인용하는 것이 정상적인 흐름이다.
 
 11단계. Knowledge Category 배치
 완성된 노트를 `03_KNOWLEDGE/10_fleeting/{카테고리}/` 하위폴더에 저장하고 `knowledge_category` frontmatter에 그 경로를 기록하라. 현재 카테고리 목록과 배치 규칙은 `06_AI_Curation_Caution_System.md`의 "Knowledge Category 배치" 절을 따른다. 애매하면 `99_미분류_라이프스타일`에 둔다.
