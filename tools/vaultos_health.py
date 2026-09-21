@@ -75,8 +75,9 @@ class Report:
 
 def scan_vault(root):
     """1패스 스캔. ADR-001: Drive 마운트에서 프로세스 spawn을 피한다."""
-    notes = {}          # 확장자 제외 상대경로 -> 실제 경로
+    notes = {}          # 확장자 제외 상대경로 -> 실제 경로 (.md 전용)
     by_basename = defaultdict(list)
+    all_files = set()   # 확장자 포함 상대경로 전체 (.md 아닌 파일도 링크 대상이 될 수 있다)
     root_files = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
@@ -85,10 +86,11 @@ def scan_vault(root):
             rel = os.path.relpath(path, root).replace(os.sep, "/")
             if os.path.dirname(rel) == "":
                 root_files.append(rel)
+            all_files.add(rel)
             if fn.endswith(".md"):
                 notes[rel[:-3]] = rel
                 by_basename[fn[:-3]].append(rel)
-    return notes, by_basename, root_files
+    return notes, by_basename, root_files, all_files
 
 
 def check_root_structure(root, root_files, report):
@@ -104,8 +106,14 @@ def check_root_structure(root, root_files, report):
             report.add("warn", "root-loose-file", f"루트에 정리되지 않은 파일: {fn}")
 
 
-def check_links(root, notes, by_basename, report, include_archive=False):
-    """REQ-LINT-002"""
+def check_links(root, notes, by_basename, all_files, report, include_archive=False):
+    """REQ-LINT-002
+
+    .md가 아닌 파일(project.yaml 등)로의 위키링크도 대상이 될 수 있다 —
+    Obsidian은 어떤 파일이든 링크할 수 있다. all_files로 확장자 포함
+    정확히 존재하는지 먼저 확인하고, 없을 때만 .md 전용 인덱스(notes)로
+    폴백한다.
+    """
     broken_paths = 0
     unwritten = defaultdict(list)
     for rel_dir, actual in sorted(notes.items()):
@@ -122,9 +130,11 @@ def check_links(root, notes, by_basename, report, include_archive=False):
             target = match.group(1).strip().rstrip("\\")   # 표 안의 \| 이스케이프
             if not target or target.startswith("http") or "{{" in target:
                 continue                                    # 템플릿 치환자 제외
+            if target in all_files:
+                continue                                     # 확장자 포함 정확히 존재 (.md 아닌 파일 포함)
             if target.startswith("./") or target.startswith("../"):
                 resolved = os.path.normpath(os.path.join(base_dir, target)).replace(os.sep, "/")
-                if resolved in notes:
+                if resolved in notes or resolved in all_files:
                     continue
             if target in notes or os.path.basename(target) in by_basename:
                 continue
@@ -195,9 +205,9 @@ def main(argv):
         return 2
 
     report = Report()
-    notes, by_basename, root_files = scan_vault(root)
+    notes, by_basename, root_files, all_files = scan_vault(root)
     check_root_structure(root, root_files, report)
-    broken, unwritten = check_links(root, notes, by_basename, report)
+    broken, unwritten = check_links(root, notes, by_basename, all_files, report)
     counts = check_projects(root, report)
 
     print(f"VaultOS Health Check — {root}")

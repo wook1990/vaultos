@@ -11,7 +11,7 @@ import sys
 import tempfile
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import vaultos_health as vh  # noqa: E402
 
 
@@ -40,9 +40,9 @@ def build_vault(base, profile="personal-full", with_all_roots=True):
 
 def run(base, include_archive=False):
     report = vh.Report()
-    notes, by_basename, root_files = vh.scan_vault(base)
+    notes, by_basename, root_files, all_files = vh.scan_vault(base)
     vh.check_root_structure(base, root_files, report)
-    vh.check_links(base, notes, by_basename, report, include_archive)
+    vh.check_links(base, notes, by_basename, all_files, report, include_archive)
     counts = vh.check_projects(base, report)
     return report, counts
 

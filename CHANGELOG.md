@@ -21,6 +21,18 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 ### Fixed
 - (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
 
+## [2.2.3] - 2026-09-21
+
+실제 vault에 "완전히 개발됐는지" 확인해달라는 요청을 받고 `vaultos_health.py`를 돌려보다가 두 개의 진짜 버그를 발견했다.
+
+### Fixed
+- `tools/tests/test_vaultos_health.py`가 `sys.path`에 존재하지 않는 `tools/src/`를 넣고 있어 **테스트 스위트 자체가 한 번도 실행된 적이 없었다** (`ModuleNotFoundError`). `tools/`로 정정
+- `vaultos_health.py`의 링크 검사가 `.md` 파일만 알고 있어서, `project.yaml`처럼 실제로 존재하는 비-`.md` 파일로의 위키링크를 전부 broken-link로 오탐했다. `scan_vault`가 모든 파일(`all_files`)도 함께 인덱싱하도록 고치고, 링크 검사에서 먼저 확인하도록 했다
+
+### Verified
+- 수정 후 `tools/tests/test_vaultos_health.py` 23개 테스트 전부 통과
+- 실제 vault(`/mnt/g/내 드라이브/LvUp_Storage/Storage`) 대상 실행: error 0 / warn 0 / note 1
+
 ## [2.2.2] - 2026-09-21
 
 ### Fixed
