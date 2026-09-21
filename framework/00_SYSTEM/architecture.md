@@ -18,6 +18,7 @@ updated: 2026-09-19
 04_AGENTS/        에이전트 역할 계약
 05_OPERATIONS/    사람이 보는 통제 화면
 07_PRODUCTS/      배포된 제품·운영 중인 자동화의 상태
+08_DEVICES/       지금 뭐가 어디서 돌고 있는가 — 기기 레지스트리
 98_PERSONAL/      업무와 무관한 개인 기록
 99_ARCHIVE/       삭제하지 않고 내리는 곳
 ```
@@ -106,6 +107,15 @@ company/<slug>/product.yaml     회사 배포 제품·자동화
 ```
 
 `02_WORKSPACES`가 "만들고 있는 것", `07_PRODUCTS`는 "지금 떠 있는 것"이다. 프로젝트가 `RELEASE`에 도달하면 등록한다. 개발 상태(task, CR, ADR)는 여전히 `02_WORKSPACES` 쪽 프로젝트에 남고, 여기는 운영 상태 요약(`live`/`degraded`/`paused`/`retired`)만 가진다. 상세: [[07_PRODUCTS/README|07_PRODUCTS]].
+
+### 08_DEVICES
+
+```text
+personal/<slug>/device.yaml    개인 기기
+company/<slug>/device.yaml     회사 기기
+```
+
+구독 계정으로 도는 CLI 코딩 에이전트는 항상 특정 기기에 묶여 실행된다. `07_PRODUCTS`가 "무엇이 배포됐는가"라면 여기는 "그게 물리적으로 어디서 도는가"다. 상세: [[08_DEVICES/README|08_DEVICES]].
 
 ### 98_PERSONAL / 99_ARCHIVE
 

@@ -21,6 +21,21 @@ VaultOS 프레임워크(이 repo)의 버전 기록이다. SemVer를 따른다.
 ### Fixed
 - (이전 커밋에서 반영, 이번에 버전 기록만 정리) `01_GOVERNANCE/vaultos-health.md`의 "구현" 포인터가 `vaultos-health-check` 흡수 전 경로를 가리키던 것을 vault·framework 양쪽에서 정정
 
+## [2.3.0] - 2026-09-21
+
+`08_DEVICES` 신설 — 여러 기기에서 같은 vault를 쓸 때 "지금 뭐가 어디서 돌고 있는가"를 기록하는 계층. 구독 계정으로 도는 CLI 코딩 에이전트(Claude Code, Codex CLI, Gemini CLI 등)는 API 키가 아니라 로그인 세션으로 돌기 때문에, 에이전트는 항상 특정 기기에 묶여 실행된다는 전제에서 나왔다.
+
+### Added
+- `08_DEVICES/` — `personal/`·`company/` 물리 분리, `device.yaml` 템플릿(`00_SYSTEM/templates/device/`)
+- `04_AGENTS/assistant/` — 채널로 들어온 질문에 vault를 읽고 답하는 역할(Query-Response). 예약 알림이 아니라 질의응답이 기본값이라는 걸 계약에 명시했다. 실제 작업 트리거(Dispatch)는 계약 자리만 만들고 비활성 상태로 둔다
+- `05_OPERATIONS/channels/` — Slack/Telegram(메시지 채널, Query-Response부터)과 Orchestration Surface(예: Buzz류 — 여러 device의 에이전트를 하나의 풀로 다루는 서비스, 아직 자리만) 구분. 각 채널 문서에 연결 체크리스트 포함
+- `05_OPERATIONS/dashboard/40_devices.md`
+
+### 설계 원칙
+- 메시지 채널은 예약 알림(Notify-out)이 아니라 질의응답(Query-Response)부터 만든다 — 전부 읽기 전용이라 승인 게이트가 필요 없다
+- Orchestration Surface(실제 작업 분배)는 메시지 채널의 Query-Response가 안정화된 뒤, 그리고 그 서비스의 API가 실제로 열린 뒤에만 — 베타 서비스에 먼저 하네스를 맞추지 않는다
+- 자동화 엔진(n8n 등)이 모든 채널과 vault 사이의 유일한 접착제다 — 에이전트가 채널 API를 직접 호출하지 않는다
+
 ## [2.2.4] - 2026-09-21
 
 ### Fixed

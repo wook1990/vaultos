@@ -43,6 +43,7 @@ Repo     = Execution SSOT  실제로 무엇이 만들어졌는가 (Code / Test /
 04_AGENTS/        에이전트 역할 계약
 05_OPERATIONS/    사람이 보는 통제 화면 (대시보드 / 리뷰 / 리포트)
 07_PRODUCTS/      배포된 제품·운영 중인 자동화의 상태 (개발 상태가 아니라 운영 상태)
+08_DEVICES/       지금 뭐가 어디서 돌고 있는가 — 기기 레지스트리
 98_PERSONAL/      업무와 무관한 개인 기록
 99_ARCHIVE/       삭제하지 않고 내리는 곳
 ```

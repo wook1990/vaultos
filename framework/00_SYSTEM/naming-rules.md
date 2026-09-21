@@ -7,7 +7,7 @@ updated: 2026-09-19
 
 ## 폴더와 파일
 
-- 루트는 `2-digit` 번호 + 영문 역할 이름 (`00_SYSTEM`, `01_GOVERNANCE`, `07_PRODUCTS`, `99_ARCHIVE`)
+- 루트는 `2-digit` 번호 + 영문 역할 이름 (`00_SYSTEM`, `01_GOVERNANCE`, `07_PRODUCTS`, `08_DEVICES`, `99_ARCHIVE`)
 - 하위 폴더는 로컬 번호 또는 의미 이름
 - 프로젝트 슬러그는 **영문 소문자 + 하이픈** (`my-new-app`, `data-pipeline`)
 - 수집·기록 파일은 날짜 기반 이름을 우선한다 (`20260919_openai-agents_inbox.md`)
