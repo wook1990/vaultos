@@ -53,7 +53,7 @@ VaultOS를 장기적으로 읽을 수 있고 신뢰할 수 있는 상태로 유�
 python3 <repo>/src/vaultos_health.py "<vault_path>"
 ```
 
-구현: [[02_WORKSPACES/personal/projects/vaultos-health-check/governance/constitution|vaultos-health-check]] — repo 경로는 그 프로젝트의 `project.yaml`에 있다 (ADR-001에 따라 Python 표준 라이브러리 1패스)
+구현: [[02_WORKSPACES/personal/projects/vaultos/governance/constitution|vaultos]] `tools/` — repo 경로는 그 프로젝트의 `project.yaml`에 있다 (ADR-001에 따라 Python 표준 라이브러리 1패스). 독립 검사 도구로 시작했더라도 결국 프레임워크 repo 자체의 `tools/`로 흡수되는 경우가 일반적이다 — 별도 프로젝트로 오래 유지할 이유가 없다면 처음부터 나누지 않는다
 종료 코드 `0` = error 없음, `1` = error 있음. 출력 등급은 `error` / `warn` / `note` 세 단계다.
 
 `note`의 대부분은 **아직 만들지 않은 노트를 가리키는 링크**다. Zettelkasten에서는 정상이므로 오류로 보지 않는다.
